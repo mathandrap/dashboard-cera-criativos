@@ -28,6 +28,6 @@ echo ===========================================
 echo.
 echo Se o push falou, configure o remote do GitHub:
 echo   git remote add origin https://github.com/SEU-USUARIO/dashboard-cera-criativos.git
-echo   git push -u origin master
+echo   git push -u origin main
 echo.
 pause

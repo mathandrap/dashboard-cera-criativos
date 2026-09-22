@@ -28,7 +28,7 @@ Se ainda nao configurou o remote:
 
 ```bash
 git remote add origin https://github.com/SEU-USUARIO/dashboard-cera-criativos.git
-git push -u origin master
+git push -u origin main
 ```
 
 ## Requisitos
