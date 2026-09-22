@@ -513,7 +513,7 @@ print("[5/5] Fazendo commit e push para o GitHub...")
 try:
     subprocess.run(['git', 'add', 'index.html'], cwd=REPO_DIR, check=True)
     subprocess.run(['git', 'commit', '-m', f'update: dados atualizados em {data_hoje}'], cwd=REPO_DIR, check=True)
-    subprocess.run(['git', 'push', 'origin', 'main'], cwd=REPO_DIR, check=True)
+    subprocess.run(['git', 'push', 'origin', 'master'], cwd=REPO_DIR, check=True)
     print("      Push realizado com sucesso!")
 except subprocess.CalledProcessError as e:
     print(f"      [AVISO] Erro no git: {e}")
