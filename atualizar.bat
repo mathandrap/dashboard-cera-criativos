@@ -15,9 +15,10 @@ if errorlevel 1 (
 )
 
 echo [1/3] Python encontrado
-echo [2/3] Executando atualizacao...
+echo [2/3] Navegando para pasta do dashboard...
 echo.
 
+cd /d "C:\Users\PC\Documents\Dashboards\CERA"
 python update_dashboard.py
 
 echo.

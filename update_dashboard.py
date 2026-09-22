@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, text
 DB_URL = "postgresql+psycopg2://postgres:giwS2InC1gqYAmjCSbL@cera-database-automacao.plataformacera.com:5437/postgres"
 SSL_CERT = r"C:\Users\PC\.config\opencode\skills\cera-db\certs\client.crt"
 SSL_KEY = r"C:\Users\PC\.config\opencode\skills\cera-db\certs\client.key"
-REPO_DIR = r"C:\Users\PC\Downloads\dashboard-cera-github"
+REPO_DIR = r"C:\Users\PC\Documents\Dashboards\CERA"
 HTML_OUTPUT = f"{REPO_DIR}\\index.html"
 MIN_LEADS = 20
 
