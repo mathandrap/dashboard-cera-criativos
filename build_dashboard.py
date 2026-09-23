@@ -398,7 +398,7 @@ with open(template_path, 'w', encoding='utf-8') as f:
     <table id="tableFull">
       <thead>
         <tr>
-          <th>Criativo</th><th>ID Meta</th><th>Campanha</th><th>Fonte</th><th>Midia</th><th>Leads</th><th>Conv.</th>
+          <th>Criativo</th><th>Nome Meta</th><th>Campanha</th><th>Fonte</th><th>Midia</th><th>Leads</th><th>Conv.</th>
           <th>Taxa</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Frio</th><th>Decil%</th><th>Tempo</th>
         </tr>
       </thead>
@@ -485,7 +485,7 @@ function renderAllTables(data) {
   document.getElementById('tbodyFull').innerHTML = data.map(c=>
     `<tr>` +
       `<td class="truncate" title="${c.criativo}">${c.criativo}</td>` +
-      `<td style="font-size:0.75rem;color:var(--text-muted)">${c.id_meta_criativo || '-'}</td>` +
+      `<td style="font-size:0.75rem;color:var(--text-muted)">${c.nome_meta_criativo || '-'}</td>` +
       `<td class="truncate">${c.campanha}</td>` +
       `<td>${c.fonte}</td>` +
       `<td>${c.midia}</td>` +

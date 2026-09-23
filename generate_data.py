@@ -183,6 +183,18 @@ agg['data_min'] = agg['data_min'].dt.strftime('%Y-%m-%d')
 agg['data_max'] = agg['data_max'].dt.strftime('%Y-%m-%d')
 
 records = agg.to_dict('records')
+
+# Adicionar nomes Meta Ads
+meta_ids_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meta_ids.json')
+try:
+    with open(meta_ids_path, 'r', encoding='utf-8') as f:
+        meta_ids = json.load(f)
+    for r in records:
+        r['nome_meta_criativo'] = meta_ids.get('anuncios', {}).get(r['criativo'], '')
+        r['nome_meta_campanha'] = meta_ids.get('campanhas', {}).get(r['campanha'], '')
+except Exception as e:
+    print(f"      [Aviso] Nao carregou meta_ids.json: {e}")
+
 total_leads = len(df)
 total_conv = int(df['converteu'].sum())
 taxa_geral = (total_conv / total_leads) * 100 if total_leads > 0 else 0
