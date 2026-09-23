@@ -375,7 +375,7 @@ with open(template_path, 'w', encoding='utf-8') as f:
           <th>Conv.</th><th>Taxa</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Frio</th><th>Tempo</th>
         </tr>
       </thead>
-      <tbody id="tbodyTop"></tbody>
+      <tbody id="tbodyTop">{{TBODY_TOP}}</tbody>
     </table>
   </div>
 </div>
@@ -387,7 +387,7 @@ with open(template_path, 'w', encoding='utf-8') as f:
       <thead>
         <tr><th>Criativo</th><th>Campanha</th><th>Leads</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Status</th></tr>
       </thead>
-      <tbody id="tbodyZero"></tbody>
+      <tbody id="tbodyZero">{{TBODY_ZERO}}</tbody>
     </table>
   </div>
 </div>
@@ -402,7 +402,7 @@ with open(template_path, 'w', encoding='utf-8') as f:
           <th>Taxa</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Frio</th><th>Decil%</th><th>Tempo</th>
         </tr>
       </thead>
-      <tbody id="tbodyFull"></tbody>
+      <tbody id="tbodyFull">{{TBODY_FULL}}</tbody>
     </table>
   </div>
 </div>
@@ -647,6 +647,37 @@ updateCharts(criativos);
 </body>
 </html>''')
 
+# Gerar linhas das tabelas em HTML (server-side rendering)
+def badge_class(taxa):
+    if taxa >= 5: return 'badge-success'
+    if taxa >= 2: return 'badge-warning'
+    return 'badge-danger'
+
+def decil_class(decil):
+    if decil >= 60: return 'decil-quente'
+    if decil >= 45: return 'decil-morno'
+    return 'decil-frio'
+
+# Top 20
+records_sorted = sorted([r for r in records if r['taxa_conversao'] > 0], key=lambda x: x['taxa_conversao'], reverse=True)[:20]
+tbody_top = ""
+for i, c in enumerate(records_sorted):
+    tempo = f"{c['dias_medios_conversao']:.1f}" if c['dias_medios_conversao'] is not None else 'N/A'
+    tbody_top += f'<tr><td><span class="badge badge-info">{i+1}</span></td><td class="truncate" title="{c["criativo"]}">{c["criativo"]}</td><td class="truncate">{c["campanha"]}</td><td>{c["fonte"]}</td><td>{c["midia"]}</td><td>{c["total_leads"]}</td><td>{c["conversoes"]}</td><td><span class="badge {badge_class(c["taxa_conversao_pct"])}">{c["taxa_conversao_pct"]:.2f}%</span></td><td><span class="decil-box {decil_class(c["decil_medio"])}">{c["decil_medio"]:.1f}</span></td><td>{c["pct_quente"]:.1f}%</td><td>{c["pct_morno"]:.1f}%</td><td>{c["pct_frio"]:.1f}%</td><td>{tempo}</td></tr>\n'
+
+# Zero conversao
+records_zero = sorted([r for r in records if r['taxa_conversao'] == 0], key=lambda x: x['total_leads'], reverse=True)
+tbody_zero = ""
+for c in records_zero:
+    tbody_zero += f'<tr><td class="truncate" title="{c["criativo"]}">{c["criativo"]}</td><td class="truncate">{c["campanha"]}</td><td style="color:var(--accent);font-weight:700">{c["total_leads"]}</td><td><span class="decil-box {decil_class(c["decil_medio"])}">{c["decil_medio"]:.1f}</span></td><td>{c["pct_quente"]:.1f}%</td><td>{c["pct_morno"]:.1f}%</td><td><span class="badge badge-danger">PAUSAR</span></td></tr>\n'
+
+# Full
+tbody_full = ""
+for c in records:
+    tempo = f"{c['dias_medios_conversao']:.1f}" if c['dias_medios_conversao'] is not None else 'N/A'
+    nome_meta = c.get('nome_meta_criativo', '') or '-'
+    tbody_full += f'<tr><td class="truncate" title="{c["criativo"]}">{c["criativo"]}</td><td style="font-size:0.75rem;color:var(--text-muted)">{nome_meta}</td><td class="truncate">{c["campanha"]}</td><td>{c["fonte"]}</td><td>{c["midia"]}</td><td>{c["total_leads"]}</td><td>{c["conversoes"]}</td><td><span class="badge {badge_class(c["taxa_conversao_pct"])}">{c["taxa_conversao_pct"]:.2f}%</span></td><td><span class="decil-box {decil_class(c["decil_medio"])}">{c["decil_medio"]:.1f}</span></td><td>{c["pct_quente"]:.1f}%</td><td>{c["pct_morno"]:.1f}%</td><td>{c["pct_frio"]:.1f}%</td><td>{c["pct_com_decil"]:.1f}%</td><td>{tempo}</td></tr>\n'
+
 # Ler template e substituir placeholders
 with open(template_path, 'r', encoding='utf-8') as f:
     template = f.read()
@@ -676,7 +707,10 @@ html_final = template \
     .replace('{{CONTENT_OPTIONS}}', content_options) \
     .replace('{{DATA_MIN}}', data_min) \
     .replace('{{DATA_MAX}}', data_max) \
-    .replace('{{CRIATIVOS_JSON}}', json.dumps(records, ensure_ascii=False, default=str, indent=2))
+    .replace('{{CRIATIVOS_JSON}}', json.dumps(records, ensure_ascii=False, default=str, indent=2)) \
+    .replace('{{TBODY_TOP}}', tbody_top) \
+    .replace('{{TBODY_ZERO}}', tbody_zero) \
+    .replace('{{TBODY_FULL}}', tbody_full)
 
 with open(f"{REPO_DIR}\\index.html", 'w', encoding='utf-8') as f:
     f.write(html_final)
