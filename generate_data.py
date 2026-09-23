@@ -182,6 +182,11 @@ agg['pct_com_decil'] = agg['pct_com_decil'] * 100
 agg['data_min'] = agg['data_min'].dt.strftime('%Y-%m-%d')
 agg['data_max'] = agg['data_max'].dt.strftime('%Y-%m-%d')
 
+# Limpar NaN antes de serializar
+for col in agg.columns:
+    if agg[col].dtype == 'float64':
+        agg[col] = agg[col].where(agg[col].notna(), None)
+
 records = agg.to_dict('records')
 
 # Adicionar nomes Meta Ads
