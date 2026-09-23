@@ -3,103 +3,495 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Criativos CERA | Com Decil</title>
+<title>Dashboard CERA | Analise por Criativo + Decil</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
   :root {
-    --bg: #0f172a; --card: #1e293b; --card-hover: #334155;
-    --text: #f1f5f9; --text-muted: #94a3b8; --accent: #3b82f6;
-    --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
-    --border: rgba(148,163,184,0.1);
+    --bg: #08090B;
+    --card: #17191E;
+    --card-hover: #2C2F35;
+    --text: #F5F5F5;
+    --text-muted: #92959C;
+    --accent: #FE1F2D;
+    --accent-dark: #A80F1C;
+    --accent-deep: #710812;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #FE1F2D;
+    --border: rgba(146,149,156,0.15);
+    --gradient: linear-gradient(135deg, #710812 0%, #FE1F2D 50%, #FF3542 100%);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height:100vh; line-height:1.6; }
-  .container { max-width:1400px; margin:0 auto; padding:2rem; }
-  header { text-align:center; padding:2rem 0 1rem; border-bottom:1px solid var(--border); margin-bottom:2rem; }
-  header h1 { font-size:2rem; font-weight:800; } header h1 span { color:var(--accent); }
-  header p { color:var(--text-muted); font-size:0.9rem; }
-  .stats-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:1rem; margin-bottom:2rem; }
-  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.5rem; text-align:center; }
-  .stat-card .value { font-size:2rem; font-weight:800; margin:0.5rem 0; }
-  .stat-card .label { color:var(--text-muted); font-size:0.8rem; text-transform:uppercase; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); min-height:100vh; line-height:1.6;
+  }
+  .container { max-width:1480px; margin:0 auto; padding:2rem; }
+  
+  header {
+    text-align:center; padding:2.5rem 0 1.5rem;
+    border-bottom:2px solid var(--accent);
+    margin-bottom:2rem;
+    background: linear-gradient(180deg, rgba(254,31,45,0.05) 0%, transparent 100%);
+  }
+  header h1 { font-size:2.2rem; font-weight:900; letter-spacing:-0.02em; }
+  header h1 .cera-red { color:var(--accent); }
+  header p { color:var(--text-muted); font-size:0.95rem; margin-top:0.5rem; }
+  
+  .stats-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px,1fr));
+    gap:1rem; margin-bottom:2rem;
+  }
+  .stat-card {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:1.5rem; text-align:center; position:relative; overflow:hidden;
+    transition:all 0.3s ease;
+  }
+  .stat-card::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--gradient);
+  }
+  .stat-card:hover {
+    transform:translateY(-3px);
+    border-color:var(--accent);
+    box-shadow:0 8px 32px rgba(254,31,45,0.15);
+  }
+  .stat-card .value { font-size:2.2rem; font-weight:800; margin:0.5rem 0; }
+  .stat-card .label { color:var(--text-muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; }
+  .stat-card .change { font-size:0.8rem; margin-top:0.25rem; color:var(--text-muted); }
+  
+  .filters-section {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:1.5rem; margin-bottom:2rem;
+  }
+  .filters-title {
+    font-size:1rem; font-weight:700; color:var(--accent); margin-bottom:1rem;
+    display:flex; align-items:center; gap:0.5rem; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .filters-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(250px,1fr));
+    gap:1rem;
+  }
+  .filter-group { display:flex; flex-direction:column; gap:0.4rem; }
+  .filter-group label { font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+  .filter-group select {
+    background:#08090B; border:1px solid var(--border); color:var(--text);
+    padding:0.7rem 1rem; border-radius:8px; font-size:0.9rem;
+    cursor:pointer; transition:border-color 0.2s;
+  }
+  .filter-group select:hover, .filter-group select:focus {
+    border-color:var(--accent); outline:none;
+  }
+  .filter-actions {
+    display:flex; gap:1rem; margin-top:1rem; justify-content:flex-end;
+  }
+  .btn {
+    padding:0.6rem 1.2rem; border-radius:8px; border:none; font-size:0.85rem;
+    font-weight:600; cursor:pointer; transition:all 0.2s; text-transform:uppercase; letter-spacing:0.05em;
+  }
+  .btn-primary {
+    background:var(--accent); color:#F5F5F5;
+  }
+  .btn-primary:hover {
+    background:var(--accent-dark); box-shadow:0 4px 16px rgba(254,31,45,0.3);
+  }
+  .btn-secondary {
+    background:transparent; color:var(--text-muted); border:1px solid var(--border);
+  }
+  .btn-secondary:hover {
+    border-color:var(--accent); color:var(--accent);
+  }
+  
   .section { margin-bottom:2.5rem; }
-  .section-title { font-size:1.3rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem; }
-  .section-title::before { content:''; width:4px; height:24px; background:var(--accent); border-radius:2px; }
-  .chart-container { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; }
-  .charts-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(450px,1fr)); gap:1.5rem; }
+  .section-title {
+    font-size:1.2rem; font-weight:700; margin-bottom:1rem;
+    display:flex; align-items:center; gap:0.5rem;
+    text-transform:uppercase; letter-spacing:0.03em;
+  }
+  .section-title::before {
+    content:''; width:4px; height:24px;
+    background:var(--gradient); border-radius:2px;
+  }
+  .chart-container {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:1.5rem; margin-bottom:1.5rem;
+  }
+  .charts-row {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(450px,1fr)); gap:1.5rem;
+  }
+  
   table { width:100%; border-collapse:collapse; font-size:0.85rem; }
-  th, td { padding:0.75rem 0.8rem; text-align:left; border-bottom:1px solid var(--border); }
-  th { background:rgba(59,130,246,0.1); color:var(--accent); font-weight:700; font-size:0.7rem; text-transform:uppercase; position:sticky; top:0; }
-  tr:hover { background:rgba(255,255,255,0.03); }
-  .badge { display:inline-block; padding:0.2rem 0.5rem; border-radius:999px; font-size:0.7rem; font-weight:700; }
-  .badge-success { background:rgba(34,197,94,0.15); color:var(--success); }
-  .badge-warning { background:rgba(245,158,11,0.15); color:var(--warning); }
-  .badge-danger { background:rgba(239,68,68,0.15); color:var(--danger); }
-  .badge-info { background:rgba(59,130,246,0.15); color:var(--accent); }
+  th, td { padding:0.8rem 0.9rem; text-align:left; border-bottom:1px solid var(--border); }
+  th {
+    background:rgba(254,31,45,0.08); color:var(--accent); font-weight:700;
+    text-transform:uppercase; font-size:0.7rem; letter-spacing:0.05em;
+    position:sticky; top:0;
+  }
+  tr:hover { background:rgba(254,31,45,0.03); }
+  .badge {
+    display:inline-block; padding:0.2rem 0.5rem; border-radius:999px;
+    font-size:0.7rem; font-weight:700;
+  }
+  .badge-success { background:rgba(34,197,94,0.15); color:#22c55e; }
+  .badge-warning { background:rgba(245,158,11,0.15); color:#f59e0b; }
+  .badge-danger { background:rgba(254,31,45,0.15); color:var(--accent); }
+  .badge-info { background:rgba(254,31,45,0.1); color:var(--accent); }
   .truncate { max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .table-container { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; max-height:500px; overflow-y:auto; }
-  .filter-bar { display:flex; gap:1rem; margin-bottom:1rem; flex-wrap:wrap; }
-  .filter-bar input, .filter-bar select { background:var(--card); border:1px solid var(--border); color:var(--text); padding:0.5rem 1rem; border-radius:8px; font-size:0.9rem; }
-  .decil-box { display:inline-block; padding:0.3rem 0.6rem; border-radius:6px; font-weight:700; font-size:0.8rem; }
-  .decil-quente { background:rgba(34,197,94,0.2); color:#22c55e; }
-  .decil-morno { background:rgba(245,158,11,0.2); color:#f59e0b; }
-  .decil-frio { background:rgba(239,68,68,0.2); color:#ef4444; }
-  footer { text-align:center; padding:2rem; color:var(--text-muted); font-size:0.8rem; border-top:1px solid var(--border); margin-top:2rem; }
-  @media (max-width:768px) { .charts-row { grid-template-columns:1fr; } }
+  .table-container {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    overflow:hidden; max-height:500px; overflow-y:auto;
+  }
+  
+  .decil-box {
+    display:inline-block; padding:0.25rem 0.6rem; border-radius:6px;
+    font-weight:700; font-size:0.75rem;
+  }
+  .decil-quente { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3); }
+  .decil-morno { background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
+  .decil-frio { background:rgba(254,31,45,0.1); color:var(--accent); border:1px solid rgba(254,31,45,0.2); }
+  
+  .correlation-grid {
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr)); gap:1rem;
+  }
+  .corr-card {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:1.2rem; transition:all 0.2s;
+  }
+  .corr-card:hover { border-color:var(--accent); }
+  .corr-card h4 { color:var(--accent); font-size:0.9rem; margin-bottom:0.5rem; }
+  .corr-card .metric { font-size:1.8rem; font-weight:800; }
+  .corr-card .desc { color:var(--text-muted); font-size:0.8rem; }
+  
+  footer {
+    text-align:center; padding:2rem; color:var(--text-muted);
+    font-size:0.8rem; border-top:1px solid var(--border); margin-top:2rem;
+  }
+  footer .cera-brand { color:var(--accent); font-weight:700; }
+  
+  @media (max-width:768px) {
+    .charts-row { grid-template-columns:1fr; }
+    .stats-grid { grid-template-columns:repeat(2,1fr); }
+    .filters-grid { grid-template-columns:1fr; }
+  }
 </style>
 </head>
 <body>
+
 <div class="container">
 
 <header>
-  <h1>Analise por <span>Criativo</span> + <span style="color:#22c55e">Decil</span></h1>
+  <h1>Dashboard <span class="cera-red">CERA</span> | Analise por Criativo</h1>
   <p>Conversao + Qualificacao Decil + Tempo Medio | Atualizado em 23/09/2026</p>
 </header>
 
 <div class="stats-grid">
   <div class="stat-card">
     <div class="label">Total Leads</div>
-    <div class="value">6,624</div>
-    <div style="color:var(--text-muted);font-size:0.8rem">Com UTM</div>
+    <div class="value">6,654</div>
+    <div class="change">Com rastreamento UTM</div>
   </div>
   <div class="stat-card">
     <div class="label">Com Decil</div>
-    <div class="value" style="color:var(--accent)">5,881</div>
-    <div style="color:var(--text-muted);font-size:0.8rem">88.8% dos leads</div>
+    <div class="value" style="color:var(--accent)">5,900</div>
+    <div class="change">88.7% dos leads</div>
   </div>
   <div class="stat-card">
     <div class="label">Conversoes</div>
-    <div class="value" style="color:var(--success)">223</div>
-    <div style="color:var(--text-muted);font-size:0.8rem">3.37% geral</div>
+    <div class="value" style="color:#22c55e">223</div>
+    <div class="change">3.35% geral</div>
   </div>
   <div class="stat-card">
     <div class="label">Decil Medio</div>
-    <div class="value" style="color:var(--warning)">36.6</div>
-    <div style="color:var(--text-muted);font-size:0.8rem">/100 pontos</div>
+    <div class="value" style="color:#f59e0b">36.7</div>
+    <div class="change">/100 pontos</div>
   </div>
   <div class="stat-card">
     <div class="label">Criativos</div>
     <div class="value">35</div>
-    <div style="color:var(--text-muted);font-size:0.8rem">Min. 20 leads</div>
+    <div class="change">Min. 20 leads</div>
   </div>
   <div class="stat-card">
     <div class="label">Melhor Taxa</div>
-    <div class="value" style="color:var(--success)">12.50%</div>
-    <div style="color:var(--text-muted);font-size:0.8rem">BLACKCERA2025</div>
+    <div class="value" style="color:#22c55e">12.50%</div>
+    <div class="change">BLACKCERA2025</div>
+  </div>
+</div>
+
+<div class="filters-section">
+  <div class="filters-title">🎯 Filtros UTM</div>
+  <div class="filters-grid">
+    <div class="filter-group">
+      <label>Fonte (utm_source)</label>
+      <select id="filterSource" onchange="updateFilters()">
+        <option value="all">Todas as fontes</option>
+        <option value="00 | AUTO | Mix">00 | AUTO | Mix</option>
+        <option value="789">789</option>
+        <option value="cera">cera</option>
+        <option value="facebook">facebook</option>
+        <option value="fb">fb</option>
+        <option value="google_search">google_search</option>
+        <option value="ig">ig</option>
+        <option value="instagram">instagram</option>
+        <option value="meta_ads">meta_ads</option>
+        <option value="templocar">templocar</option>
+        <option value="{{adset.name}}">{{adset.name}}</option>
+        <option value="{{site_source_name}}">{{site_source_name}}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Midia (utm_medium)</label>
+      <select id="filterMedium" onchange="updateFilters()">
+        <option value="all">Todas as midias</option>
+        <option value="10-07 ia">10-07 ia</option>
+        <option value="456">456</option>
+        <option value="AD01">AD01</option>
+        <option value="AD01 -">AD01 -</option>
+        <option value="AD02">AD02</option>
+        <option value="AD03">AD03</option>
+        <option value="AD04">AD04</option>
+        <option value="AD05">AD05</option>
+        <option value="AD06">AD06</option>
+        <option value="AD07">AD07</option>
+        <option value="AD07 - 7 dias">AD07 - 7 dias</option>
+        <option value="Garagem-250-Jose">Garagem-250-Jose</option>
+        <option value="Mafia do Brilho.mov">Mafia do Brilho.mov</option>
+        <option value="MarceloCalixto">MarceloCalixto</option>
+        <option value="Miranda Detail">Miranda Detail</option>
+        <option value="Netinho Nomel">Netinho Nomel</option>
+        <option value="Pagando para trabalhar">Pagando para trabalhar</option>
+        <option value="Pagando para trabalhar — Cópia">Pagando para trabalhar — Cópia</option>
+        <option value="WID caixinha">WID caixinha</option>
+        <option value="ad01">ad01</option>
+        <option value="ad01 agendamento externo — Cópia">ad01 agendamento externo — Cópia</option>
+        <option value="ad011 (CAE) comparação e demonstração de nova funcionalidade estilo Instagram 7.mov">ad011 (CAE) comparação e demonstração de nova funcionalidade estilo Instagram 7.mov</option>
+        <option value="ad012 (CAE) com comparação 2.mov">ad012 (CAE) com comparação 2.mov</option>
+        <option value="ad013 (CAE) comparação sem estilo Instagram 8.mov">ad013 (CAE) comparação sem estilo Instagram 8.mov</option>
+        <option value="ad02">ad02</option>
+        <option value="ad05">ad05</option>
+        <option value="ad07 (CAE)dono de estética recebendo mensagem 1.mov">ad07 (CAE)dono de estética recebendo mensagem 1.mov</option>
+        <option value="ads">ads</option>
+        <option value="albac_cobremaiscaro">albac_cobremaiscaro</option>
+        <option value="autoagendamento maio 26">autoagendamento maio 26</option>
+        <option value="basso — Cópia">basso — Cópia</option>
+        <option value="basso_cheklist">basso_cheklist</option>
+        <option value="bio">bio</option>
+        <option value="campanha">campanha</option>
+        <option value="cliente 2021">cliente 2021</option>
+        <option value="controle">controle</option>
+        <option value="corujao01">corujao01</option>
+        <option value="cpc">cpc</option>
+        <option value="d">d</option>
+        <option value="g">g</option>
+        <option value="gimenez">gimenez</option>
+        <option value="instagram">instagram</option>
+        <option value="intagram">intagram</option>
+        <option value="paid">paid</option>
+        <option value="posto ipiranga">posto ipiranga</option>
+        <option value="protecaodemarca">protecaodemarca</option>
+        <option value="qrcode - yotube">qrcode - yotube</option>
+        <option value="s">s</option>
+        <option value="social">social</option>
+        <option value="templocar">templocar</option>
+        <option value="templocar_cenas">templocar_cenas</option>
+        <option value="teste01 outubro 25">teste01 outubro 25</option>
+        <option value="teste03 outubro 25">teste03 outubro 25</option>
+        <option value="teste03 outubro 25 pg4">teste03 outubro 25 pg4</option>
+        <option value="teste03 outubro 25 — Cópia">teste03 outubro 25 — Cópia</option>
+        <option value="tiago">tiago</option>
+        <option value="wid_pagaparatrabahar">wid_pagaparatrabahar</option>
+        <option value="{{ad.name}}">{{ad.name}}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Campanha (utm_campaign)</label>
+      <select id="filterCampaign" onchange="updateFilters()">
+        <option value="all">Todas as campanhas</option>
+        <option value="01 | auto |">01 | auto |</option>
+        <option value="120225108578690379">120225108578690379</option>
+        <option value="120226047187050379">120226047187050379</option>
+        <option value="120231195562080658">120231195562080658</option>
+        <option value="120231195758700658">120231195758700658</option>
+        <option value="120231564793090379">120231564793090379</option>
+        <option value="120231895076470379">120231895076470379</option>
+        <option value="120231895355160379">120231895355160379</option>
+        <option value="120232401405670379">120232401405670379</option>
+        <option value="120234025290140379">120234025290140379</option>
+        <option value="120234025765660379">120234025765660379</option>
+        <option value="120234026862800379">120234026862800379</option>
+        <option value="120234027004190379">120234027004190379</option>
+        <option value="120245591477760379">120245591477760379</option>
+        <option value="16466482949">16466482949</option>
+        <option value="22415092261">22415092261</option>
+        <option value="23530320387">23530320387</option>
+        <option value="[Legado]   Registro | Réplica | Antigos | replica | asc  | CERA">[Legado]   Registro | Réplica | Antigos | replica ...</option>
+        <option value="[Legado] Lead  | Replica | Antigos">[Legado] Lead  | Replica | Antigos</option>
+        <option value="[Legado] Vendas |  Lead | Réplica | Antigos">[Legado] Vendas |  Lead | Réplica | Antigos</option>
+        <option value="[Legado] Vendas | Testes | Criativos | Contínuos |  Ads antigos - | UTM legado 01">[Legado] Vendas | Testes | Criativos | Contínuos |...</option>
+        <option value="[MKT] Lead  | Pagando para trabalhar">[MKT] Lead  | Pagando para trabalhar</option>
+        <option value="[MKT] Lead  | Pagando para trabalhar [CERA] utm2">[MKT] Lead  | Pagando para trabalhar [CERA] utm2</option>
+        <option value="[MKT] Lead  | Tiago |">[MKT] Lead  | Tiago |</option>
+        <option value="[MKT] Lead  | Tiago | — Cópia">[MKT] Lead  | Tiago | — Cópia</option>
+        <option value="[MKT] Lead  | pareceiro [CERA]">[MKT] Lead  | pareceiro [CERA]</option>
+        <option value="[MKT] Leads |  teste de página  [CERA]">[MKT] Leads |  teste de página  [CERA]</option>
+        <option value="[MKT] Leads | Ads  agosto parceiro [CERA]">[MKT] Leads | Ads  agosto parceiro [CERA]</option>
+        <option value="[MKT] Leads | Ads Maio [CERA]">[MKT] Leads | Ads Maio [CERA]</option>
+        <option value="[MKT] Leads | WID caixinha">[MKT] Leads | WID caixinha</option>
+        <option value="[MKT] Leads | outubro  25 | teste 01">[MKT] Leads | outubro  25 | teste 01</option>
+        <option value="[MKT] Leads | outubro  25 | teste 03">[MKT] Leads | outubro  25 | teste 03</option>
+        <option value="[MKT] Leads | teste ads [CERA]">[MKT] Leads | teste ads [CERA]</option>
+        <option value="[MKT] Mix | Teste | link novo">[MKT] Mix | Teste | link novo</option>
+        <option value="[MKT] [CERA] Agendamento externo  | Vendas | vitrini 1">[MKT] [CERA] Agendamento externo  | Vendas | vitri...</option>
+        <option value="[MKT] [CERA] Agendamento externo  | Vendas | vitrini 2 lp">[MKT] [CERA] Agendamento externo  | Vendas | vitri...</option>
+        <option value="albac_cobremaiscaro">albac_cobremaiscaro</option>
+        <option value="basso_cheklist">basso_cheklist</option>
+        <option value="central_cera">central_cera</option>
+        <option value="geovani">geovani</option>
+        <option value="indique_ganhe">indique_ganhe</option>
+        <option value="nome-da-campanha">nome-da-campanha</option>
+        <option value="qrcode - yotube">qrcode - yotube</option>
+        <option value="templocar_cenas">templocar_cenas</option>
+        <option value="teste">teste</option>
+        <option value="thiagoceravisita">thiagoceravisita</option>
+        <option value="wid">wid</option>
+        <option value="wid_pagaparatrabahar">wid_pagaparatrabahar</option>
+        <option value="wid_pagaparatrabahar_reels">wid_pagaparatrabahar_reels</option>
+        <option value="{{campaign.name}}">{{campaign.name}}</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Criativo (utm_content)</label>
+      <select id="filterContent" onchange="updateFilters()">
+        <option value="all">Todos os criativos</option>
+        <option value="00 | AUTO | Mix">00 | AUTO | Mix</option>
+        <option value="120224154457750379">120224154457750379</option>
+        <option value="120225108578750379">120225108578750379</option>
+        <option value="120226046114620379">120226046114620379</option>
+        <option value="120226046185560379">120226046185560379</option>
+        <option value="120226046202710379">120226046202710379</option>
+        <option value="120226046853260379">120226046853260379</option>
+        <option value="120226047354960379">120226047354960379</option>
+        <option value="120226047385290379">120226047385290379</option>
+        <option value="120231195562060658">120231195562060658</option>
+        <option value="120231195562070658">120231195562070658</option>
+        <option value="120231195562100658">120231195562100658</option>
+        <option value="120231195562120658">120231195562120658</option>
+        <option value="120231195562140658">120231195562140658</option>
+        <option value="120231195562150658">120231195562150658</option>
+        <option value="120231195562160658">120231195562160658</option>
+        <option value="120231195562170658">120231195562170658</option>
+        <option value="120231195562180658">120231195562180658</option>
+        <option value="120231195562370658">120231195562370658</option>
+        <option value="120231195562380658">120231195562380658</option>
+        <option value="120231195562390658">120231195562390658</option>
+        <option value="120231195562400658">120231195562400658</option>
+        <option value="120231195562430658">120231195562430658</option>
+        <option value="120231195562440658">120231195562440658</option>
+        <option value="120231195562450658">120231195562450658</option>
+        <option value="120231195562460658">120231195562460658</option>
+        <option value="120231564793100379">120231564793100379</option>
+        <option value="120231566838710379">120231566838710379</option>
+        <option value="120231895076520379">120231895076520379</option>
+        <option value="120234025290150379">120234025290150379</option>
+        <option value="120234025765670379">120234025765670379</option>
+        <option value="120234027004200379">120234027004200379</option>
+        <option value="120239006848130379">120239006848130379</option>
+        <option value="120244665665080379">120244665665080379</option>
+        <option value="120244665723930379">120244665723930379</option>
+        <option value="120244666316220379">120244666316220379</option>
+        <option value="120244666338400379">120244666338400379</option>
+        <option value="120245591477780379">120245591477780379</option>
+        <option value="120245600350950379">120245600350950379</option>
+        <option value="120246186606480379">120246186606480379</option>
+        <option value="120246187883050379">120246187883050379</option>
+        <option value="120248753261950379">120248753261950379</option>
+        <option value="120248999363360379">120248999363360379</option>
+        <option value="120249888771440379">120249888771440379</option>
+        <option value="120249888771470379">120249888771470379</option>
+        <option value="585631393370">585631393370</option>
+        <option value="744193151510">744193151510</option>
+        <option value="796163298699">796163298699</option>
+        <option value="BLACKCERA2025">BLACKCERA2025</option>
+        <option value="BocaMarcolino">BocaMarcolino</option>
+        <option value="Calixto">Calixto</option>
+        <option value="GabrielAlbach">GabrielAlbach</option>
+        <option value="INDIC_KEOOOvfGEun50HhhgLz0cw">INDIC_KEOOOvfGEun50HhhgLz0cw</option>
+        <option value="INDIC_PnGF90PbOp8fr9c9Wi2lBg">INDIC_PnGF90PbOp8fr9c9Wi2lBg</option>
+        <option value="INDIC_uZct26P2nYUSEbe5_JN6uw">INDIC_uZct26P2nYUSEbe5_JN6uw</option>
+        <option value="Joseph">Joseph</option>
+        <option value="Lucas">Lucas</option>
+        <option value="Perguntaswid">Perguntaswid</option>
+        <option value="Quartzo_dica_autoagendamento">Quartzo_dica_autoagendamento</option>
+        <option value="Ricael">Ricael</option>
+        <option value="ad01">ad01</option>
+        <option value="albac_cobremaiscaro">albac_cobremaiscaro</option>
+        <option value="basso_cheklist">basso_cheklist</option>
+        <option value="bioplayinstagram">bioplayinstagram</option>
+        <option value="bioplaytiktok">bioplaytiktok</option>
+        <option value="chatprivado">chatprivado</option>
+        <option value="collab">collab</option>
+        <option value="direct-wid">direct-wid</option>
+        <option value="erich">erich</option>
+        <option value="legado1">legado1</option>
+        <option value="legado2">legado2</option>
+        <option value="link_in_bio">link_in_bio</option>
+        <option value="ls">ls</option>
+        <option value="lucasteste">lucasteste</option>
+        <option value="parceiro_joao10">parceiro_joao10</option>
+        <option value="parceiro_tropadapinturaautomotiva">parceiro_tropadapinturaautomotiva</option>
+        <option value="parceiro_wilsonfrazao">parceiro_wilsonfrazao</option>
+        <option value="perfil">perfil</option>
+        <option value="primoscar">primoscar</option>
+        <option value="qrcode - yotube">qrcode - yotube</option>
+        <option value="remarketingximangosampling">remarketingximangosampling</option>
+        <option value="seven">seven</option>
+        <option value="stories">stories</option>
+        <option value="templocar_cenas">templocar_cenas</option>
+        <option value="test_wid_f5k">test_wid_f5k</option>
+        <option value="teste">teste</option>
+        <option value="teste_gratis">teste_gratis</option>
+        <option value="teste_kevyn_f5k">teste_kevyn_f5k</option>
+        <option value="thiagoceravisita">thiagoceravisita</option>
+        <option value="tipo-de-anuncio">tipo-de-anuncio</option>
+        <option value="vitrine-digital">vitrine-digital</option>
+        <option value="wid_pagaparatrabahar">wid_pagaparatrabahar</option>
+        <option value="wplay">wplay</option>
+        <option value="{{NetinhoNomel}}">{{NetinhoNomel}}</option>
+        <option value="{{ad.id}}">{{ad.id}}</option>
+        <option value="{{adset.name}}">{{adset.name}}</option>
+        <option value="{{coujao01}}">{{coujao01}}</option>
+        <option value="{{gimenez}}">{{gimenez}}</option>
+        <option value="{{mafiadobrilho}}">{{mafiadobrilho}}</option>
+        <option value="{{mirandadetail}}">{{mirandadetail}}</option>
+      </select>
+    </div>
+  </div>
+  <div class="filter-actions">
+    <button class="btn btn-secondary" onclick="resetFilters()">Limpar Filtros</button>
+    <button class="btn btn-primary" onclick="applyFilters()">Aplicar Filtros</button>
   </div>
 </div>
 
 <div class="section">
-  <div class="section-title">Taxa de Conversao por Criativo</div>
+  <div class="section-title">Performance por Criativo</div>
   <div class="charts-row">
-    <div class="chart-container"><canvas id="chartTaxa"></canvas></div>
-    <div class="chart-container"><canvas id="chartDecil"></canvas></div>
+    <div class="chart-container">
+      <h3 style="margin-bottom:1rem;font-size:0.9rem;color:var(--text-muted)">Taxa de Conversao (%)</h3>
+      <canvas id="chartTaxa"></canvas>
+    </div>
+    <div class="chart-container">
+      <h3 style="margin-bottom:1rem;font-size:0.9rem;color:var(--text-muted)">Decil Medio por Criativo</h3>
+      <canvas id="chartDecil"></canvas>
+    </div>
   </div>
 </div>
 
 <div class="section">
   <div class="section-title">Correlacao: Decil vs Conversao</div>
-  <div class="chart-container"><canvas id="chartScatter"></canvas></div>
+  <div class="chart-container">
+    <canvas id="chartScatter" height="80"></canvas>
+  </div>
 </div>
 
 <div class="section">
@@ -111,12 +503,17 @@
 </div>
 
 <div class="section">
+  <div class="section-title">Correlacao Campanha x Criativo</div>
+  <div class="correlation-grid" id="correlationCards"></div>
+</div>
+
+<div class="section">
   <div class="section-title">Top 20 Criativos - Conversao + Decil</div>
   <div class="table-container">
     <table id="tableTop">
       <thead>
         <tr>
-          <th>#</th><th>Criativo</th><th>Campanha</th><th>Fonte</th><th>Leads</th>
+          <th>#</th><th>Criativo</th><th>Campanha</th><th>Fonte</th><th>Midia</th><th>Leads</th>
           <th>Conv.</th><th>Taxa</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Frio</th><th>Tempo</th>
         </tr>
       </thead>
@@ -126,11 +523,11 @@
 </div>
 
 <div class="section">
-  <div class="section-title" style="color:var(--danger)">Criativos com 0% Conversao</div>
+  <div class="section-title" style="color:var(--accent)">Criativos com 0% Conversao</div>
   <div class="table-container">
     <table id="tableZero">
       <thead>
-        <tr><th>Criativo</th><th>Leads</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Status</th></tr>
+        <tr><th>Criativo</th><th>Campanha</th><th>Leads</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Status</th></tr>
       </thead>
       <tbody id="tbodyZero"></tbody>
     </table>
@@ -139,27 +536,11 @@
 
 <div class="section">
   <div class="section-title">Tabela Completa</div>
-  <div class="filter-bar">
-    <input type="text" id="searchInput" placeholder="Buscar criativo..." onkeyup="filterTable()">
-    <select id="filterTaxa" onchange="filterTable()">
-      <option value="all">Todas taxas</option>
-      <option value="high">Alta (&gt;5%)</option>
-      <option value="mid">Media (1-5%)</option>
-      <option value="low">Baixa (&lt;1%)</option>
-      <option value="zero">Zero (0%)</option>
-    </select>
-    <select id="filterDecil" onchange="filterTable()">
-      <option value="all">Todos Decil</option>
-      <option value="quente">Quente (&gt;60)</option>
-      <option value="morno">Morno (45-59)</option>
-      <option value="frio">Frio (&lt;45)</option>
-    </select>
-  </div>
   <div class="table-container" style="max-height:600px;">
     <table id="tableFull">
       <thead>
         <tr>
-          <th>Criativo</th><th>Campanha</th><th>Fonte</th><th>Leads</th><th>Conv.</th>
+          <th>Criativo</th><th>Campanha</th><th>Fonte</th><th>Midia</th><th>Leads</th><th>Conv.</th>
           <th>Taxa</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Frio</th><th>Decil%</th><th>Tempo</th>
         </tr>
       </thead>
@@ -169,166 +550,233 @@
 </div>
 
 <footer>
-  Dashboard CERA v2.0 | Com pontuacao Decil | Atualizado em 23/09/2026
+  <span class="cera-brand">CERA</span> — Dashboard de Analise por Criativo v3.0 | Atualizado em 23/09/2026
 </footer>
 
 </div>
 
 <script>
-const criativos = [{"criativo": "BLACKCERA2025", "total_leads": 56, "conversoes": 7, "taxa_conversao": 0.125, "decil_medio": 45.113207547169814, "pct_quente": 19.642857142857142, "pct_morno": 25.0, "pct_frio": 50.0, "pct_com_decil": 94.64285714285714, "dias_medios_conversao": 69.9747333068783, "receita_media": 1139.857142857143, "campanha": "desconhecido", "fonte": "desconhecido", "taxa_conversao_pct": 12.5}, {"criativo": "744193151510", "total_leads": 471, "conversoes": 58, "taxa_conversao": 0.12314225053078556, "decil_medio": 49.22095671981777, "pct_quente": 31.634819532908704, "pct_morno": 22.29299363057325, "pct_frio": 39.27813163481954, "pct_com_decil": 93.20594479830149, "dias_medios_conversao": 25.067050399904215, "receita_media": 810.8796551724138, "campanha": "22415092261", "fonte": "google_search", "taxa_conversao_pct": 12.314225053078557}, {"criativo": "link_in_bio", "total_leads": 723, "conversoes": 62, "taxa_conversao": 0.08575380359612725, "decil_medio": 40.73880597014925, "pct_quente": 18.25726141078838, "pct_morno": 18.672199170124482, "pct_frio": 55.73997233748271, "pct_com_decil": 92.66943291839557, "dias_medios_conversao": 28.607019494100957, "receita_media": 856.0790322580646, "campanha": "desconhecido", "fonte": "ig", "taxa_conversao_pct": 8.575380359612724}, {"criativo": "120225108578750379", "total_leads": 26, "conversoes": 2, "taxa_conversao": 0.07692307692307693, "decil_medio": 30.375, "pct_quente": 7.6923076923076925, "pct_morno": 7.6923076923076925, "pct_frio": 76.92307692307693, "pct_com_decil": 92.3076923076923, "dias_medios_conversao": 8.439055700231481, "receita_media": 149.9, "campanha": "[MKT] Lead  | Tiago |", "fonte": "ig", "taxa_conversao_pct": 7.6923076923076925}, {"criativo": "teste_gratis", "total_leads": 133, "conversoes": 7, "taxa_conversao": 0.05263157894736842, "decil_medio": 41.078125, "pct_quente": 18.796992481203006, "pct_morno": 18.045112781954884, "pct_frio": 59.3984962406015, "pct_com_decil": 96.2406015037594, "dias_medios_conversao": 13.974824677579365, "receita_media": 502.9428571428571, "campanha": "central_cera", "fonte": "instagram", "taxa_conversao_pct": 5.263157894736842}, {"criativo": "120226047354960379", "total_leads": 22, "conversoes": 1, "taxa_conversao": 0.045454545454545456, "decil_medio": 27.7, "pct_quente": 4.545454545454546, "pct_morno": 13.636363636363635, "pct_frio": 72.72727272727273, "pct_com_decil": 90.9090909090909, "dias_medios_conversao": 23.435323159722223, "receita_media": 149.9, "campanha": "120226047187050379", "fonte": "ig", "taxa_conversao_pct": 4.545454545454546}, {"criativo": "120231195562160658", "total_leads": 62, "conversoes": 2, "taxa_conversao": 0.03225806451612903, "decil_medio": 43.84615384615385, "pct_quente": 22.58064516129032, "pct_morno": 19.35483870967742, "pct_frio": 41.935483870967744, "pct_com_decil": 83.87096774193549, "dias_medios_conversao": 9.171364525462963, "receita_media": 573.45, "campanha": "[Legado] Vendas | Testes | Criativos | Contínuos |  Ads antigos - | UTM legado 01", "fonte": "meta_ads", "taxa_conversao_pct": 3.225806451612903}, {"criativo": "120234025765670379", "total_leads": 126, "conversoes": 4, "taxa_conversao": 0.031746031746031744, "decil_medio": 36.1747572815534, "pct_quente": 11.11111111111111, "pct_morno": 13.492063492063492, "pct_frio": 57.14285714285714, "pct_com_decil": 81.74603174603175, "dias_medios_conversao": 33.839535778356485, "receita_media": 344.175, "campanha": "[MKT] Leads | outubro  25 | teste 01", "fonte": "ig", "taxa_conversao_pct": 3.1746031746031744}, {"criativo": "legado1", "total_leads": 604, "conversoes": 16, "taxa_conversao": 0.026490066225165563, "decil_medio": 36.300567107750474, "pct_quente": 11.589403973509933, "pct_morno": 18.874172185430464, "pct_frio": 57.11920529801324, "pct_com_decil": 87.58278145695364, "dias_medios_conversao": 69.68280190031828, "receita_media": 768.7125, "campanha": "120231195562080658", "fonte": "ig", "taxa_conversao_pct": 2.6490066225165565}, {"criativo": "Quartzo_dica_autoagendamento", "total_leads": 193, "conversoes": 5, "taxa_conversao": 0.025906735751295335, "decil_medio": 35.00568181818182, "pct_quente": 12.953367875647666, "pct_morno": 13.471502590673575, "pct_frio": 64.76683937823834, "pct_com_decil": 91.19170984455958, "dias_medios_conversao": 15.708981453703704, "receita_media": 574.74, "campanha": "120234027004190379", "fonte": "ig", "taxa_conversao_pct": 2.5906735751295336}, {"criativo": "thiagoceravisita", "total_leads": 156, "conversoes": 4, "taxa_conversao": 0.02564102564102564, "decil_medio": 34.00735294117647, "pct_quente": 11.538461538461538, "pct_morno": 12.82051282051282, "pct_frio": 62.82051282051282, "pct_com_decil": 87.17948717948718, "dias_medios_conversao": 13.453430407986112, "receita_media": 344.175, "campanha": "thiagoceravisita", "fonte": "ig", "taxa_conversao_pct": 2.564102564102564}, {"criativo": "120234027004200379", "total_leads": 241, "conversoes": 6, "taxa_conversao": 0.024896265560165973, "decil_medio": 38.19607843137255, "pct_quente": 9.54356846473029, "pct_morno": 19.502074688796682, "pct_frio": 55.601659751037346, "pct_com_decil": 84.64730290456431, "dias_medios_conversao": 11.860646624228394, "receita_media": 547.9666666666667, "campanha": "[MKT] Leads | outubro  25 | teste 03", "fonte": "ig", "taxa_conversao_pct": 2.4896265560165975}, {"criativo": "qrcode - yotube", "total_leads": 42, "conversoes": 1, "taxa_conversao": 0.023809523809523808, "decil_medio": 36.878787878787875, "pct_quente": 9.523809523809524, "pct_morno": 11.904761904761903, "pct_frio": 57.14285714285714, "pct_com_decil": 78.57142857142857, "dias_medios_conversao": 15.04275329861111, "receita_media": 299.9, "campanha": "qrcode - yotube", "fonte": "desconhecido", "taxa_conversao_pct": 2.380952380952381}, {"criativo": "test_wid_f5k", "total_leads": 213, "conversoes": 5, "taxa_conversao": 0.023474178403755867, "decil_medio": 36.83248730964467, "pct_quente": 15.96244131455399, "pct_morno": 13.615023474178404, "pct_frio": 62.91079812206573, "pct_com_decil": 92.48826291079813, "dias_medios_conversao": 35.64425420138889, "receita_media": 277.32, "campanha": "120234025765660379", "fonte": "ig", "taxa_conversao_pct": 2.3474178403755865}, {"criativo": "120244665723930379", "total_leads": 128, "conversoes": 3, "taxa_conversao": 0.0234375, "decil_medio": 34.12931034482759, "pct_quente": 9.375, "pct_morno": 11.71875, "pct_frio": 69.53125, "pct_com_decil": 90.625, "dias_medios_conversao": 13.334125177469135, "receita_media": 524.6333333333333, "campanha": "[MKT] Leads | Ads Maio [CERA]", "fonte": "ig", "taxa_conversao_pct": 2.34375}, {"criativo": "120248753261950379", "total_leads": 43, "conversoes": 1, "taxa_conversao": 0.023255813953488372, "decil_medio": 40.13513513513514, "pct_quente": 18.6046511627907, "pct_morno": 16.27906976744186, "pct_frio": 51.162790697674424, "pct_com_decil": 86.04651162790698, "dias_medios_conversao": 2.9426933680555556, "receita_media": 149.9, "campanha": "[MKT] Leads | teste ads [CERA]", "fonte": "ig", "taxa_conversao_pct": 2.3255813953488373}, {"criativo": "120231895076520379", "total_leads": 288, "conversoes": 6, "taxa_conversao": 0.020833333333333332, "decil_medio": 33.996, "pct_quente": 6.597222222222222, "pct_morno": 15.277777777777779, "pct_frio": 64.93055555555556, "pct_com_decil": 86.80555555555556, "dias_medios_conversao": 16.797976462191357, "receita_media": 869.6333333333333, "campanha": "[MKT] Leads | WID caixinha", "fonte": "ig", "taxa_conversao_pct": 2.083333333333333}, {"criativo": "{{NetinhoNomel}}", "total_leads": 50, "conversoes": 1, "taxa_conversao": 0.02, "decil_medio": 29.545454545454547, "pct_quente": 4.0, "pct_morno": 2.0, "pct_frio": 60.0, "pct_com_decil": 66.0, "dias_medios_conversao": 15.991850057870371, "receita_media": 997.0, "campanha": "[MKT] Lead  | pareceiro [CERA]", "fonte": "ig", "taxa_conversao_pct": 2.0}, {"criativo": "120239006848130379", "total_leads": 110, "conversoes": 2, "taxa_conversao": 0.01818181818181818, "decil_medio": 33.32967032967033, "pct_quente": 9.090909090909092, "pct_morno": 10.909090909090908, "pct_frio": 62.727272727272734, "pct_com_decil": 82.72727272727273, "dias_medios_conversao": 40.17104137152778, "receita_media": 1247.0, "campanha": "wid_pagaparatrabahar_reels", "fonte": "ig", "taxa_conversao_pct": 1.8181818181818181}, {"criativo": "Perguntaswid", "total_leads": 394, "conversoes": 7, "taxa_conversao": 0.017766497461928935, "decil_medio": 34.73829201101928, "pct_quente": 10.406091370558377, "pct_morno": 19.289340101522843, "pct_frio": 62.43654822335025, "pct_com_decil": 92.13197969543148, "dias_medios_conversao": 19.77641916501323, "receita_media": 481.09999999999997, "campanha": "120231895076470379", "fonte": "ig", "taxa_conversao_pct": 1.7766497461928936}, {"criativo": "basso_cheklist", "total_leads": 371, "conversoes": 6, "taxa_conversao": 0.016172506738544475, "decil_medio": 33.23125, "pct_quente": 8.62533692722372, "pct_morno": 14.016172506738545, "pct_frio": 63.61185983827493, "pct_com_decil": 86.25336927223721, "dias_medios_conversao": 99.38426896990741, "receita_media": 373.93333333333334, "campanha": "basso_cheklist", "fonte": "ig", "taxa_conversao_pct": 1.6172506738544474}, {"criativo": "120231564793100379", "total_leads": 202, "conversoes": 2, "taxa_conversao": 0.009900990099009901, "decil_medio": 35.49122807017544, "pct_quente": 7.425742574257425, "pct_morno": 14.356435643564355, "pct_frio": 62.87128712871287, "pct_com_decil": 84.65346534653465, "dias_medios_conversao": 10.095919155092593, "receita_media": 538.45, "campanha": "[MKT] Mix | Teste | link novo", "fonte": "ig", "taxa_conversao_pct": 0.9900990099009901}, {"criativo": "120244666338400379", "total_leads": 253, "conversoes": 2, "taxa_conversao": 0.007905138339920948, "decil_medio": 30.785087719298247, "pct_quente": 6.324110671936759, "pct_morno": 9.881422924901186, "pct_frio": 73.91304347826086, "pct_com_decil": 90.11857707509881, "dias_medios_conversao": 14.146627303240741, "receita_media": 114.9, "campanha": "[MKT] Leads | Ads Maio [CERA]", "fonte": "ig", "taxa_conversao_pct": 0.7905138339920948}, {"criativo": "remarketingximangosampling", "total_leads": 181, "conversoes": 1, "taxa_conversao": 0.0055248618784530384, "decil_medio": 30.80473372781065, "pct_quente": 4.972375690607735, "pct_morno": 14.917127071823206, "pct_frio": 73.48066298342542, "pct_com_decil": 93.37016574585635, "dias_medios_conversao": 46.44651778935185, "receita_media": 149.9, "campanha": "120231895355160379", "fonte": "ig", "taxa_conversao_pct": 0.5524861878453038}, {"criativo": "templocar_cenas", "total_leads": 266, "conversoes": 1, "taxa_conversao": 0.0037593984962406013, "decil_medio": 32.75423728813559, "pct_quente": 7.894736842105263, "pct_morno": 11.654135338345863, "pct_frio": 69.17293233082707, "pct_com_decil": 88.7218045112782, "dias_medios_conversao": 17.924084560185186, "receita_media": 149.9, "campanha": "templocar_cenas", "fonte": "ig", "taxa_conversao_pct": 0.37593984962406013}, {"criativo": "00 | AUTO | Mix", "total_leads": 239, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 34.023809523809526, "pct_quente": 12.552301255230125, "pct_morno": 10.460251046025103, "pct_frio": 64.85355648535564, "pct_com_decil": 87.86610878661088, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] Mix | Teste | link novo", "fonte": "00 | AUTO | Mix", "taxa_conversao_pct": 0.0}, {"criativo": "120231195562170658", "total_leads": 39, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 39.6875, "pct_quente": 15.384615384615385, "pct_morno": 17.94871794871795, "pct_frio": 48.717948717948715, "pct_com_decil": 82.05128205128204, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[Legado] Vendas | Testes | Criativos | Contínuos |  Ads antigos - | UTM legado 01", "fonte": "meta_ads", "taxa_conversao_pct": 0.0}, {"criativo": "BocaMarcolino", "total_leads": 20, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 34.8, "pct_quente": 15.0, "pct_morno": 5.0, "pct_frio": 55.00000000000001, "pct_com_decil": 75.0, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "desconhecido", "fonte": "desconhecido", "taxa_conversao_pct": 0.0}, {"criativo": "120248999363360379", "total_leads": 95, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 25.523809523809526, "pct_quente": 2.1052631578947367, "pct_morno": 5.263157894736842, "pct_frio": 81.05263157894737, "pct_com_decil": 88.42105263157895, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] Leads | teste ads [CERA]", "fonte": "ig", "taxa_conversao_pct": 0.0}, {"criativo": "120231195562430658", "total_leads": 27, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 38.75, "pct_quente": 14.814814814814813, "pct_morno": 11.11111111111111, "pct_frio": 62.96296296296296, "pct_com_decil": 88.88888888888889, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[Legado] Vendas | Testes | Criativos | Contínuos |  Ads antigos - | UTM legado 01", "fonte": "meta_ads", "taxa_conversao_pct": 0.0}, {"criativo": "120234025290150379", "total_leads": 44, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 36.23684210526316, "pct_quente": 11.363636363636363, "pct_morno": 13.636363636363635, "pct_frio": 61.36363636363637, "pct_com_decil": 86.36363636363636, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] Lead  | Tiago | — Cópia", "fonte": "ig", "taxa_conversao_pct": 0.0}, {"criativo": "primoscar", "total_leads": 57, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 28.509090909090908, "pct_quente": 3.508771929824561, "pct_morno": 7.017543859649122, "pct_frio": 85.96491228070175, "pct_com_decil": 96.49122807017544, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "desconhecido", "fonte": "desconhecido", "taxa_conversao_pct": 0.0}, {"criativo": "vitrine-digital", "total_leads": 75, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 34.029411764705884, "pct_quente": 8.0, "pct_morno": 17.333333333333336, "pct_frio": 65.33333333333333, "pct_com_decil": 90.66666666666666, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] [CERA] Agendamento externo  | Vendas | vitrini 2 lp", "fonte": "ig", "taxa_conversao_pct": 0.0}, {"criativo": "wid_pagaparatrabahar", "total_leads": 356, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 31.72638436482085, "pct_quente": 7.303370786516854, "pct_morno": 13.202247191011235, "pct_frio": 65.73033707865169, "pct_com_decil": 86.23595505617978, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "wid_pagaparatrabahar", "fonte": "ig", "taxa_conversao_pct": 0.0}, {"criativo": "{{ad.id}}", "total_leads": 22, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 42.05, "pct_quente": 13.636363636363635, "pct_morno": 22.727272727272727, "pct_frio": 54.54545454545454, "pct_com_decil": 90.9090909090909, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "{{campaign.name}}", "fonte": "{{site_source_name}}", "taxa_conversao_pct": 0.0}];
+const criativos = [{"criativo": "BLACKCERA2025", "total_leads": 56, "conversoes": 7, "taxa_conversao": 0.125, "decil_medio": 45.113207547169814, "pct_quente": 19.642857142857142, "pct_morno": 25.0, "pct_frio": 50.0, "pct_com_decil": 94.64285714285714, "dias_medios_conversao": 69.9747333068783, "receita_media": 1139.857142857143, "campanha": "desconhecido", "fonte": "desconhecido", "midia": "desconhecido", "taxa_conversao_pct": 12.5}, {"criativo": "744193151510", "total_leads": 478, "conversoes": 58, "taxa_conversao": 0.12133891213389121, "decil_medio": 49.34389140271493, "pct_quente": 31.589958158995817, "pct_morno": 22.17573221757322, "pct_frio": 38.70292887029289, "pct_com_decil": 92.46861924686193, "dias_medios_conversao": 25.067050399904215, "receita_media": 810.8796551724138, "campanha": "22415092261", "fonte": "google_search", "midia": "g", "taxa_conversao_pct": 12.133891213389122}, {"criativo": "link_in_bio", "total_leads": 723, "conversoes": 62, "taxa_conversao": 0.08575380359612725, "decil_medio": 40.73880597014925, "pct_quente": 18.25726141078838, "pct_morno": 18.672199170124482, "pct_frio": 55.73997233748271, "pct_com_decil": 92.66943291839557, "dias_medios_conversao": 28.607019494100957, "receita_media": 856.0790322580646, "campanha": "desconhecido", "fonte": "ig", "midia": "social", "taxa_conversao_pct": 8.575380359612724}, {"criativo": "120225108578750379", "total_leads": 26, "conversoes": 2, "taxa_conversao": 0.07692307692307693, "decil_medio": 30.375, "pct_quente": 7.6923076923076925, "pct_morno": 7.6923076923076925, "pct_frio": 76.92307692307693, "pct_com_decil": 92.3076923076923, "dias_medios_conversao": 8.439055700231481, "receita_media": 149.9, "campanha": "[MKT] Lead  | Tiago |", "fonte": "ig", "midia": "tiago", "taxa_conversao_pct": 7.6923076923076925}, {"criativo": "teste_gratis", "total_leads": 138, "conversoes": 7, "taxa_conversao": 0.050724637681159424, "decil_medio": 41.25, "pct_quente": 18.115942028985508, "pct_morno": 19.565217391304348, "pct_frio": 57.971014492753625, "pct_com_decil": 95.65217391304348, "dias_medios_conversao": 13.974824677579365, "receita_media": 502.9428571428571, "campanha": "central_cera", "fonte": "instagram", "midia": "bio", "taxa_conversao_pct": 5.072463768115942}, {"criativo": "120226047354960379", "total_leads": 22, "conversoes": 1, "taxa_conversao": 0.045454545454545456, "decil_medio": 27.7, "pct_quente": 4.545454545454546, "pct_morno": 13.636363636363635, "pct_frio": 72.72727272727273, "pct_com_decil": 90.9090909090909, "dias_medios_conversao": 23.435323159722223, "receita_media": 149.9, "campanha": "120226047187050379", "fonte": "ig", "midia": "paid", "taxa_conversao_pct": 4.545454545454546}, {"criativo": "120231195562160658", "total_leads": 62, "conversoes": 2, "taxa_conversao": 0.03225806451612903, "decil_medio": 43.84615384615385, "pct_quente": 22.58064516129032, "pct_morno": 19.35483870967742, "pct_frio": 41.935483870967744, "pct_com_decil": 83.87096774193549, "dias_medios_conversao": 9.171364525462963, "receita_media": 573.45, "campanha": "[Legado] Vendas | Testes | Criativos | Contínuos |  Ads antigos - | UTM legado 01", "fonte": "meta_ads", "midia": "AD03", "taxa_conversao_pct": 3.225806451612903}, {"criativo": "120234025765670379", "total_leads": 126, "conversoes": 4, "taxa_conversao": 0.031746031746031744, "decil_medio": 36.1747572815534, "pct_quente": 11.11111111111111, "pct_morno": 13.492063492063492, "pct_frio": 57.14285714285714, "pct_com_decil": 81.74603174603175, "dias_medios_conversao": 33.839535778356485, "receita_media": 344.175, "campanha": "[MKT] Leads | outubro  25 | teste 01", "fonte": "ig", "midia": "teste01 outubro 25", "taxa_conversao_pct": 3.1746031746031744}, {"criativo": "legado1", "total_leads": 604, "conversoes": 16, "taxa_conversao": 0.026490066225165563, "decil_medio": 36.300567107750474, "pct_quente": 11.589403973509933, "pct_morno": 18.874172185430464, "pct_frio": 57.11920529801324, "pct_com_decil": 87.58278145695364, "dias_medios_conversao": 69.68280190031828, "receita_media": 768.7125, "campanha": "120231195562080658", "fonte": "ig", "midia": "paid", "taxa_conversao_pct": 2.6490066225165565}, {"criativo": "Quartzo_dica_autoagendamento", "total_leads": 193, "conversoes": 5, "taxa_conversao": 0.025906735751295335, "decil_medio": 35.00568181818182, "pct_quente": 12.953367875647666, "pct_morno": 13.471502590673575, "pct_frio": 64.76683937823834, "pct_com_decil": 91.19170984455958, "dias_medios_conversao": 15.708981453703704, "receita_media": 574.74, "campanha": "120234027004190379", "fonte": "ig", "midia": "paid", "taxa_conversao_pct": 2.5906735751295336}, {"criativo": "thiagoceravisita", "total_leads": 156, "conversoes": 4, "taxa_conversao": 0.02564102564102564, "decil_medio": 34.00735294117647, "pct_quente": 11.538461538461538, "pct_morno": 12.82051282051282, "pct_frio": 62.82051282051282, "pct_com_decil": 87.17948717948718, "dias_medios_conversao": 13.453430407986112, "receita_media": 344.175, "campanha": "thiagoceravisita", "fonte": "ig", "midia": "campanha", "taxa_conversao_pct": 2.564102564102564}, {"criativo": "120234027004200379", "total_leads": 243, "conversoes": 6, "taxa_conversao": 0.024691358024691357, "decil_medio": 38.170731707317074, "pct_quente": 9.465020576131687, "pct_morno": 19.34156378600823, "pct_frio": 55.55555555555556, "pct_com_decil": 84.36213991769547, "dias_medios_conversao": 11.860646624228394, "receita_media": 547.9666666666667, "campanha": "[MKT] Leads | outubro  25 | teste 03", "fonte": "ig", "midia": "teste03 outubro 25", "taxa_conversao_pct": 2.4691358024691357}, {"criativo": "qrcode - yotube", "total_leads": 42, "conversoes": 1, "taxa_conversao": 0.023809523809523808, "decil_medio": 36.878787878787875, "pct_quente": 9.523809523809524, "pct_morno": 11.904761904761903, "pct_frio": 57.14285714285714, "pct_com_decil": 78.57142857142857, "dias_medios_conversao": 15.04275329861111, "receita_media": 299.9, "campanha": "qrcode - yotube", "fonte": "desconhecido", "midia": "qrcode - yotube", "taxa_conversao_pct": 2.380952380952381}, {"criativo": "test_wid_f5k", "total_leads": 213, "conversoes": 5, "taxa_conversao": 0.023474178403755867, "decil_medio": 36.83248730964467, "pct_quente": 15.96244131455399, "pct_morno": 13.615023474178404, "pct_frio": 62.91079812206573, "pct_com_decil": 92.48826291079813, "dias_medios_conversao": 35.64425420138889, "receita_media": 277.32, "campanha": "120234025765660379", "fonte": "ig", "midia": "paid", "taxa_conversao_pct": 2.3474178403755865}, {"criativo": "120244665723930379", "total_leads": 128, "conversoes": 3, "taxa_conversao": 0.0234375, "decil_medio": 34.12931034482759, "pct_quente": 9.375, "pct_morno": 11.71875, "pct_frio": 69.53125, "pct_com_decil": 90.625, "dias_medios_conversao": 13.334125177469135, "receita_media": 524.6333333333333, "campanha": "[MKT] Leads | Ads Maio [CERA]", "fonte": "ig", "midia": "cliente 2021", "taxa_conversao_pct": 2.34375}, {"criativo": "120248753261950379", "total_leads": 44, "conversoes": 1, "taxa_conversao": 0.022727272727272728, "decil_medio": 40.13513513513514, "pct_quente": 18.181818181818183, "pct_morno": 15.909090909090908, "pct_frio": 50.0, "pct_com_decil": 84.0909090909091, "dias_medios_conversao": 2.9426933680555556, "receita_media": 149.9, "campanha": "[MKT] Leads | teste ads [CERA]", "fonte": "ig", "midia": "posto ipiranga", "taxa_conversao_pct": 2.272727272727273}, {"criativo": "120231895076520379", "total_leads": 289, "conversoes": 6, "taxa_conversao": 0.020761245674740483, "decil_medio": 33.940239043824704, "pct_quente": 6.5743944636678195, "pct_morno": 15.22491349480969, "pct_frio": 65.05190311418684, "pct_com_decil": 86.85121107266436, "dias_medios_conversao": 16.797976462191357, "receita_media": 869.6333333333333, "campanha": "[MKT] Leads | WID caixinha", "fonte": "ig", "midia": "WID caixinha", "taxa_conversao_pct": 2.0761245674740483}, {"criativo": "{{NetinhoNomel}}", "total_leads": 50, "conversoes": 1, "taxa_conversao": 0.02, "decil_medio": 29.545454545454547, "pct_quente": 4.0, "pct_morno": 2.0, "pct_frio": 60.0, "pct_com_decil": 66.0, "dias_medios_conversao": 15.991850057870371, "receita_media": 997.0, "campanha": "[MKT] Lead  | pareceiro [CERA]", "fonte": "ig", "midia": "Netinho Nomel", "taxa_conversao_pct": 2.0}, {"criativo": "120239006848130379", "total_leads": 110, "conversoes": 2, "taxa_conversao": 0.01818181818181818, "decil_medio": 33.32967032967033, "pct_quente": 9.090909090909092, "pct_morno": 10.909090909090908, "pct_frio": 62.727272727272734, "pct_com_decil": 82.72727272727273, "dias_medios_conversao": 40.17104137152778, "receita_media": 1247.0, "campanha": "wid_pagaparatrabahar_reels", "fonte": "ig", "midia": "ads", "taxa_conversao_pct": 1.8181818181818181}, {"criativo": "Perguntaswid", "total_leads": 394, "conversoes": 7, "taxa_conversao": 0.017766497461928935, "decil_medio": 34.73829201101928, "pct_quente": 10.406091370558377, "pct_morno": 19.289340101522843, "pct_frio": 62.43654822335025, "pct_com_decil": 92.13197969543148, "dias_medios_conversao": 19.77641916501323, "receita_media": 481.09999999999997, "campanha": "120231895076470379", "fonte": "ig", "midia": "paid", "taxa_conversao_pct": 1.7766497461928936}, {"criativo": "basso_cheklist", "total_leads": 371, "conversoes": 6, "taxa_conversao": 0.016172506738544475, "decil_medio": 33.23125, "pct_quente": 8.62533692722372, "pct_morno": 14.016172506738545, "pct_frio": 63.61185983827493, "pct_com_decil": 86.25336927223721, "dias_medios_conversao": 99.38426896990741, "receita_media": 373.93333333333334, "campanha": "basso_cheklist", "fonte": "ig", "midia": "basso_cheklist", "taxa_conversao_pct": 1.6172506738544474}, {"criativo": "120231564793100379", "total_leads": 202, "conversoes": 2, "taxa_conversao": 0.009900990099009901, "decil_medio": 35.49122807017544, "pct_quente": 7.425742574257425, "pct_morno": 14.356435643564355, "pct_frio": 62.87128712871287, "pct_com_decil": 84.65346534653465, "dias_medios_conversao": 10.095919155092593, "receita_media": 538.45, "campanha": "[MKT] Mix | Teste | link novo", "fonte": "ig", "midia": "templocar", "taxa_conversao_pct": 0.9900990099009901}, {"criativo": "120244666338400379", "total_leads": 259, "conversoes": 2, "taxa_conversao": 0.007722007722007722, "decil_medio": 31.167381974248926, "pct_quente": 6.94980694980695, "pct_morno": 10.038610038610038, "pct_frio": 72.97297297297297, "pct_com_decil": 89.96138996138995, "dias_medios_conversao": 14.146627303240741, "receita_media": 114.9, "campanha": "[MKT] Leads | Ads Maio [CERA]", "fonte": "ig", "midia": "autoagendamento maio 26", "taxa_conversao_pct": 0.7722007722007722}, {"criativo": "remarketingximangosampling", "total_leads": 181, "conversoes": 1, "taxa_conversao": 0.0055248618784530384, "decil_medio": 30.80473372781065, "pct_quente": 4.972375690607735, "pct_morno": 14.917127071823206, "pct_frio": 73.48066298342542, "pct_com_decil": 93.37016574585635, "dias_medios_conversao": 46.44651778935185, "receita_media": 149.9, "campanha": "120231895355160379", "fonte": "ig", "midia": "paid", "taxa_conversao_pct": 0.5524861878453038}, {"criativo": "templocar_cenas", "total_leads": 266, "conversoes": 1, "taxa_conversao": 0.0037593984962406013, "decil_medio": 32.75423728813559, "pct_quente": 7.894736842105263, "pct_morno": 11.654135338345863, "pct_frio": 69.17293233082707, "pct_com_decil": 88.7218045112782, "dias_medios_conversao": 17.924084560185186, "receita_media": 149.9, "campanha": "templocar_cenas", "fonte": "ig", "midia": "templocar_cenas", "taxa_conversao_pct": 0.37593984962406013}, {"criativo": "00 | AUTO | Mix", "total_leads": 239, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 34.023809523809526, "pct_quente": 12.552301255230125, "pct_morno": 10.460251046025103, "pct_frio": 64.85355648535564, "pct_com_decil": 87.86610878661088, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] Mix | Teste | link novo", "fonte": "00 | AUTO | Mix", "midia": "templocar", "taxa_conversao_pct": 0.0}, {"criativo": "120231195562170658", "total_leads": 39, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 39.6875, "pct_quente": 15.384615384615385, "pct_morno": 17.94871794871795, "pct_frio": 48.717948717948715, "pct_com_decil": 82.05128205128204, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[Legado] Vendas | Testes | Criativos | Contínuos |  Ads antigos - | UTM legado 01", "fonte": "meta_ads", "midia": "AD03", "taxa_conversao_pct": 0.0}, {"criativo": "BocaMarcolino", "total_leads": 20, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 34.8, "pct_quente": 15.0, "pct_morno": 5.0, "pct_frio": 55.00000000000001, "pct_com_decil": 75.0, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "desconhecido", "fonte": "desconhecido", "midia": "desconhecido", "taxa_conversao_pct": 0.0}, {"criativo": "120248999363360379", "total_leads": 101, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 25.84269662921348, "pct_quente": 1.9801980198019802, "pct_morno": 6.9306930693069315, "pct_frio": 79.20792079207921, "pct_com_decil": 88.11881188118812, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] Leads | teste ads [CERA]", "fonte": "ig", "midia": "10-07 ia", "taxa_conversao_pct": 0.0}, {"criativo": "120231195562430658", "total_leads": 27, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 38.75, "pct_quente": 14.814814814814813, "pct_morno": 11.11111111111111, "pct_frio": 62.96296296296296, "pct_com_decil": 88.88888888888889, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[Legado] Vendas | Testes | Criativos | Contínuos |  Ads antigos - | UTM legado 01", "fonte": "meta_ads", "midia": "AD04", "taxa_conversao_pct": 0.0}, {"criativo": "120234025290150379", "total_leads": 44, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 36.23684210526316, "pct_quente": 11.363636363636363, "pct_morno": 13.636363636363635, "pct_frio": 61.36363636363637, "pct_com_decil": 86.36363636363636, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] Lead  | Tiago | — Cópia", "fonte": "ig", "midia": "tiago", "taxa_conversao_pct": 0.0}, {"criativo": "primoscar", "total_leads": 57, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 28.509090909090908, "pct_quente": 3.508771929824561, "pct_morno": 7.017543859649122, "pct_frio": 85.96491228070175, "pct_com_decil": 96.49122807017544, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "desconhecido", "fonte": "desconhecido", "midia": "desconhecido", "taxa_conversao_pct": 0.0}, {"criativo": "vitrine-digital", "total_leads": 76, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 34.029411764705884, "pct_quente": 7.894736842105263, "pct_morno": 17.105263157894736, "pct_frio": 64.47368421052632, "pct_com_decil": 89.47368421052632, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "[MKT] [CERA] Agendamento externo  | Vendas | vitrini 2 lp", "fonte": "ig", "midia": "teste03 outubro 25 — Cópia", "taxa_conversao_pct": 0.0}, {"criativo": "wid_pagaparatrabahar", "total_leads": 356, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 31.72638436482085, "pct_quente": 7.303370786516854, "pct_morno": 13.202247191011235, "pct_frio": 65.73033707865169, "pct_com_decil": 86.23595505617978, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "wid_pagaparatrabahar", "fonte": "ig", "midia": "wid_pagaparatrabahar", "taxa_conversao_pct": 0.0}, {"criativo": "{{ad.id}}", "total_leads": 22, "conversoes": 0, "taxa_conversao": 0.0, "decil_medio": 42.05, "pct_quente": 13.636363636363635, "pct_morno": 22.727272727272727, "pct_frio": 54.54545454545454, "pct_com_decil": 90.9090909090909, "dias_medios_conversao": NaN, "receita_media": NaN, "campanha": "{{campaign.name}}", "fonte": "{{site_source_name}}", "midia": "{{ad.name}}", "taxa_conversao_pct": 0.0}];
 
-function renderTables() {
-  const top = criativos.filter(c=>c.taxa_conversao>0).sort((a,b)=>b.taxa_conversao-a.taxa_conversao).slice(0,20);
-  document.getElementById('tbodyTop').innerHTML = top.map((c,i)=>`
-    <tr>
-      <td><span class="badge badge-info">${i+1}</span></td>
-      <td class="truncate" title="${c.criativo}">${c.criativo}</td>
-      <td class="truncate">${c.campanha}</td>
-      <td>${c.fonte}</td>
-      <td>${c.total_leads}</td>
-      <td>${c.conversoes}</td>
-      <td><span class="badge ${c.taxa_conversao_pct>=5?'badge-success':c.taxa_conversao_pct>=2?'badge-warning':'badge-danger'}">${c.taxa_conversao_pct.toFixed(2)}%</span></td>
-      <td><span class="decil-box ${c.decil_medio>=60?'decil-quente':c.decil_medio>=45?'decil-morno':'decil-frio'}">${c.decil_medio.toFixed(1)}</span></td>
-      <td>${c.pct_quente.toFixed(1)}%</td>
-      <td>${c.pct_morno.toFixed(1)}%</td>
-      <td>${c.pct_frio.toFixed(1)}%</td>
-      <td>${c.dias_medios_conversao!==null?c.dias_medios_conversao.toFixed(1):'N/A'}</td>
-    </tr>
-  `).join('');
-
-  const zeros = criativos.filter(c=>c.taxa_conversao===0).sort((a,b)=>b.total_leads-a.total_leads);
-  document.getElementById('tbodyZero').innerHTML = zeros.map(c=>`
-    <tr>
-      <td class="truncate" title="${c.criativo}">${c.criativo}</td>
-      <td style="color:var(--danger);font-weight:700">${c.total_leads}</td>
-      <td><span class="decil-box ${c.decil_medio>=60?'decil-quente':c.decil_medio>=45?'decil-morno':'decil-frio'}">${c.decil_medio.toFixed(1)}</span></td>
-      <td>${c.pct_quente.toFixed(1)}%</td>
-      <td>${c.pct_morno.toFixed(1)}%</td>
-      <td><span class="badge badge-danger">PAUSAR</span></td>
-    </tr>
-  `).join('');
-
-  renderFull(criativos);
+function updateFilters() {
+  const source = document.getElementById('filterSource').value;
+  const medium = document.getElementById('filterMedium').value;
+  const campaign = document.getElementById('filterCampaign').value;
+  const content = document.getElementById('filterContent').value;
+  
+  let filtered = criativos;
+  if(source !== 'all') filtered = filtered.filter(c => c.fonte === source);
+  if(medium !== 'all') filtered = filtered.filter(c => c.midia === medium);
+  if(campaign !== 'all') filtered = filtered.filter(c => c.campanha === campaign);
+  if(content !== 'all') filtered = filtered.filter(c => c.criativo === content);
+  
+  renderAllTables(filtered);
+  updateCharts(filtered);
 }
 
-function renderFull(data) {
-  document.getElementById('tbodyFull').innerHTML = data.map(c=>`
-    <tr>
-      <td class="truncate" title="${c.criativo}">${c.criativo}</td>
-      <td class="truncate">${c.campanha}</td>
-      <td>${c.fonte}</td>
-      <td>${c.total_leads}</td>
-      <td>${c.conversoes}</td>
-      <td><span class="badge ${c.taxa_conversao_pct>=5?'badge-success':c.taxa_conversao_pct>=2?'badge-warning':c.taxa_conversao_pct>0?'badge-danger':'badge-danger'}">${c.taxa_conversao_pct.toFixed(2)}%</span></td>
-      <td><span class="decil-box ${c.decil_medio>=60?'decil-quente':c.decil_medio>=45?'decil-morno':'decil-frio'}">${c.decil_medio.toFixed(1)}</span></td>
-      <td>${c.pct_quente.toFixed(1)}%</td>
-      <td>${c.pct_morno.toFixed(1)}%</td>
-      <td>${c.pct_frio.toFixed(1)}%</td>
-      <td>${c.pct_com_decil.toFixed(1)}%</td>
-      <td>${c.dias_medios_conversao!==null?c.dias_medios_conversao.toFixed(1):'N/A'}</td>
-    </tr>
-  `).join('');
+function applyFilters() { updateFilters(); }
+
+function resetFilters() {
+  document.getElementById('filterSource').value = 'all';
+  document.getElementById('filterMedium').value = 'all';
+  document.getElementById('filterCampaign').value = 'all';
+  document.getElementById('filterContent').value = 'all';
+  renderAllTables(criativos);
+  updateCharts(criativos);
 }
 
-function filterTable() {
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const taxaFilter = document.getElementById('filterTaxa').value;
-  const decilFilter = document.getElementById('filterDecil').value;
-  let filtered = criativos.filter(c=>c.criativo.toLowerCase().includes(search)||c.campanha.toLowerCase().includes(search));
-  if(taxaFilter==='high') filtered=filtered.filter(c=>c.taxa_conversao_pct>5);
-  else if(taxaFilter==='mid') filtered=filtered.filter(c=>c.taxa_conversao_pct>=1&&c.taxa_conversao_pct<=5);
-  else if(taxaFilter==='low') filtered=filtered.filter(c=>c.taxa_conversao_pct>0&&c.taxa_conversao_pct<1);
-  else if(taxaFilter==='zero') filtered=filtered.filter(c=>c.taxa_conversao_pct===0);
-  if(decilFilter==='quente') filtered=filtered.filter(c=>c.decil_medio>60);
-  else if(decilFilter==='morno') filtered=filtered.filter(c=>c.decil_medio>=45&&c.decil_medio<=60);
-  else if(decilFilter==='frio') filtered=filtered.filter(c=>c.decil_medio<45);
-  renderFull(filtered);
+function renderAllTables(data) {
+  const top = data.filter(c=>c.taxa_conversao>0).sort((a,b)=>b.taxa_conversao-a.taxa_conversao).slice(0,20);
+  document.getElementById('tbodyTop').innerHTML = top.map((c,i)=>
+    `<tr>` +
+      `<td><span class="badge badge-info">${i+1}</span></td>` +
+      `<td class="truncate" title="${c.criativo}">${c.criativo}</td>` +
+      `<td class="truncate">${c.campanha}</td>` +
+      `<td>${c.fonte}</td>` +
+      `<td>${c.midia}</td>` +
+      `<td>${c.total_leads}</td>` +
+      `<td>${c.conversoes}</td>` +
+      `<td><span class="badge ${c.taxa_conversao_pct>=5?'badge-success':c.taxa_conversao_pct>=2?'badge-warning':'badge-danger'}">${c.taxa_conversao_pct.toFixed(2)}%</span></td>` +
+      `<td><span class="decil-box ${c.decil_medio>=60?'decil-quente':c.decil_medio>=45?'decil-morno':'decil-frio'}">${c.decil_medio.toFixed(1)}</span></td>` +
+      `<td>${c.pct_quente.toFixed(1)}%</td>` +
+      `<td>${c.pct_morno.toFixed(1)}%</td>` +
+      `<td>${c.pct_frio.toFixed(1)}%</td>` +
+      `<td>${c.dias_medios_conversao!==null?c.dias_medios_conversao.toFixed(1):'N/A'}</td>` +
+    `</tr>`
+  ).join('');
+
+  const zeros = data.filter(c=>c.taxa_conversao===0).sort((a,b)=>b.total_leads-a.total_leads);
+  document.getElementById('tbodyZero').innerHTML = zeros.map(c=>
+    `<tr>` +
+      `<td class="truncate" title="${c.criativo}">${c.criativo}</td>` +
+      `<td class="truncate">${c.campanha}</td>` +
+      `<td style="color:var(--accent);font-weight:700">${c.total_leads}</td>` +
+      `<td><span class="decil-box ${c.decil_medio>=60?'decil-quente':c.decil_medio>=45?'decil-morno':'decil-frio'}">${c.decil_medio.toFixed(1)}</span></td>` +
+      `<td>${c.pct_quente.toFixed(1)}%</td>` +
+      `<td>${c.pct_morno.toFixed(1)}%</td>` +
+      `<td><span class="badge badge-danger">PAUSAR</span></td>` +
+    `</tr>`
+  ).join('');
+
+  document.getElementById('tbodyFull').innerHTML = data.map(c=>
+    `<tr>` +
+      `<td class="truncate" title="${c.criativo}">${c.criativo}</td>` +
+      `<td class="truncate">${c.campanha}</td>` +
+      `<td>${c.fonte}</td>` +
+      `<td>${c.midia}</td>` +
+      `<td>${c.total_leads}</td>` +
+      `<td>${c.conversoes}</td>` +
+      `<td><span class="badge ${c.taxa_conversao_pct>=5?'badge-success':c.taxa_conversao_pct>=2?'badge-warning':c.taxa_conversao_pct>0?'badge-danger':'badge-danger'}">${c.taxa_conversao_pct.toFixed(2)}%</span></td>` +
+      `<td><span class="decil-box ${c.decil_medio>=60?'decil-quente':c.decil_medio>=45?'decil-morno':'decil-frio'}">${c.decil_medio.toFixed(1)}</span></td>` +
+      `<td>${c.pct_quente.toFixed(1)}%</td>` +
+      `<td>${c.pct_morno.toFixed(1)}%</td>` +
+      `<td>${c.pct_frio.toFixed(1)}%</td>` +
+      `<td>${c.pct_com_decil.toFixed(1)}%</td>` +
+      `<td>${c.dias_medios_conversao!==null?c.dias_medios_conversao.toFixed(1):'N/A'}</td>` +
+    `</tr>`
+  ).join('');
+
+  renderCorrelation(data);
 }
 
-// Charts
-const top10 = criativos.filter(c=>c.taxa_conversao>0).sort((a,b)=>b.taxa_conversao-a.taxa_conversao).slice(0,10);
-new Chart(document.getElementById('chartTaxa'),{
-  type:'bar',
-  data:{
-    labels:top10.map(c=>c.criativo.length>18?c.criativo.slice(0,18)+'...':c.criativo),
-    datasets:[{
-      label:'Taxa Conversao (%)',
-      data:top10.map(c=>c.taxa_conversao_pct),
-      backgroundColor:top10.map(c=>c.taxa_conversao_pct>=8?'rgba(34,197,94,0.7)':c.taxa_conversao_pct>=3?'rgba(245,158,11,0.7)':'rgba(239,68,68,0.7)'),
-      borderWidth:1
-    }]
-  },
-  options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(148,163,184,0.1)'},ticks:{color:'#94a3b8'}},x:{grid:{display:false},ticks:{color:'#94a3b8',maxRotation:45}}}}
-});
+function renderCorrelation(data) {
+  const campData = {};
+  data.forEach(c => {
+    if(!campData[c.campanha]) campData[c.campanha] = {leads:0, conv:0, decil:0, count:0};
+    campData[c.campanha].leads += c.total_leads;
+    campData[c.campanha].conv += c.conversoes;
+    campData[c.campanha].decil += c.decil_medio * c.total_leads;
+    campData[c.campanha].count += c.total_leads;
+  });
+  
+  const cards = Object.entries(campData)
+    .map(([camp, v]) => ({camp, leads: v.leads, conv: v.conv, taxa: v.conv/v.leads*100, decil: v.decil/v.count}))
+    .sort((a,b) => b.taxa - a.taxa)
+    .slice(0,6);
+  
+  document.getElementById('correlationCards').innerHTML = cards.map(c=>
+    `<div class="corr-card">` +
+      `<h4>${c.camp.length>25?c.camp.slice(0,25)+'...':c.camp}</h4>` +
+      `<div class="metric" style="color:${c.taxa>=5?'#22c55e':c.taxa>=2?'#f59e0b':'#FE1F2D'}">${c.taxa.toFixed(2)}%</div>` +
+      `<div class="desc">${c.leads} leads | Decil: ${c.decil.toFixed(1)} | ${c.conv} conv.</div>` +
+    `</div>`
+  ).join('');
+}
 
-const topDecil = criativos.filter(c=>c.decil_medio>0).sort((a,b)=>b.decil_medio-a.decil_medio).slice(0,10);
-new Chart(document.getElementById('chartDecil'),{
-  type:'bar',
-  data:{
-    labels:topDecil.map(c=>c.criativo.length>18?c.criativo.slice(0,18)+'...':c.criativo),
-    datasets:[{
-      label:'Decil Medio',
-      data:topDecil.map(c=>c.decil_medio),
-      backgroundColor:topDecil.map(c=>c.decil_medio>=60?'rgba(34,197,94,0.7)':c.decil_medio>=45?'rgba(245,158,11,0.7)':'rgba(239,68,68,0.7)'),
-      borderWidth:1
-    }]
-  },
-  options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100,grid:{color:'rgba(148,163,184,0.1)'},ticks:{color:'#94a3b8'}},x:{grid:{display:false},ticks:{color:'#94a3b8',maxRotation:45}}}}
-});
+let charts = {};
 
-const convs = criativos.filter(c=>c.taxa_conversao>0);
-new Chart(document.getElementById('chartScatter'),{
-  type:'scatter',
-  data:{
-    datasets:[{
-      label:'Criativos',
-      data:convs.map(c=>({x:c.decil_medio,y:c.taxa_conversao_pct,r:Math.sqrt(c.total_leads)*1.5})),
-      backgroundColor:convs.map(c=>c.decil_medio>=60?'rgba(34,197,94,0.6)':c.decil_medio>=45?'rgba(245,158,11,0.6)':'rgba(239,68,68,0.6)')
-    }]
-  },
-  options:{
-    responsive:true,
-    plugins:{tooltip:{callbacks:{label:(ctx)=>`${convs[ctx.dataIndex].criativo}: ${ctx.raw.y.toFixed(2)}% conv. | Decil: ${ctx.raw.x.toFixed(1)}`}}},
-    scales:{x:{title:{display:true,text:'Decil Medio',color:'#94a3b8'},grid:{color:'rgba(148,163,184,0.1)'},ticks:{color:'#94a3b8'}},y:{title:{display:true,text:'Taxa Conversao (%)',color:'#94a3b8'},grid:{color:'rgba(148,163,184,0.1)'},ticks:{color:'#94a3b8'}}}
-  }
-});
+function updateCharts(data) {
+  const top10 = data.filter(c=>c.taxa_conversao>0).sort((a,b)=>b.taxa_conversao-a.taxa_conversao).slice(0,10);
+  if(charts.taxa) charts.taxa.destroy();
+  charts.taxa = new Chart(document.getElementById('chartTaxa'),{
+    type:'bar',
+    data:{
+      labels:top10.map(c=>c.criativo.length>18?c.criativo.slice(0,18)+'...':c.criativo),
+      datasets:[{
+        label:'Taxa Conversao (%)',
+        data:top10.map(c=>c.taxa_conversao_pct),
+        backgroundColor:top10.map(c=>c.taxa_conversao_pct>=8?'rgba(34,197,94,0.8)':c.taxa_conversao_pct>=3?'rgba(245,158,11,0.8)':'rgba(254,31,45,0.7)'),
+        borderColor:top10.map(c=>c.taxa_conversao_pct>=8?'#22c55e':c.taxa_conversao_pct>=3?'#f59e0b':'#FE1F2D'),
+        borderWidth:1
+      }]
+    },
+    options:{
+      responsive:true,plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,grid:{color:'rgba(146,149,156,0.1)'},ticks:{color:'#92959C'}}},
+        x:{grid:{display:false},ticks:{color:'#92959C',maxRotation:45}}
+      }
+    }
+  });
 
-// Temperatura distribution
-const tempData = criativos.reduce((acc,c)=>{
-  acc.quente += c.pct_quente * c.total_leads / 100;
-  acc.morno += c.pct_morno * c.total_leads / 100;
-  acc.frio += c.pct_frio * c.total_leads / 100;
-  return acc;
-},{quente:0,morno:0,frio:0});
-new Chart(document.getElementById('chartTemperatura'),{
-  type:'doughnut',
-  data:{
-    labels:['Quente (60-100)','Morno (45-59)','Frio (0-44)'],
-    datasets:[{
-      data:[tempData.quente,tempData.morno,tempData.frio],
-      backgroundColor:['rgba(34,197,94,0.7)','rgba(245,158,11,0.7)','rgba(239,68,68,0.7)'],
-      borderWidth:0
-    }]
-  },
-  options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#94a3b8'}}}}
-});
+  const topDecil = data.filter(c=>c.decil_medio>0).sort((a,b)=>b.decil_medio-a.decil_medio).slice(0,10);
+  if(charts.decil) charts.decil.destroy();
+  charts.decil = new Chart(document.getElementById('chartDecil'),{
+    type:'bar',
+    data:{
+      labels:topDecil.map(c=>c.criativo.length>18?c.criativo.slice(0,18)+'...':c.criativo),
+      datasets:[{
+        label:'Decil Medio',
+        data:topDecil.map(c=>c.decil_medio),
+        backgroundColor:topDecil.map(c=>c.decil_medio>=60?'rgba(34,197,94,0.8)':c.decil_medio>=45?'rgba(245,158,11,0.8)':'rgba(254,31,45,0.7)'),
+        borderWidth:1
+      }]
+    },
+    options:{
+      responsive:true,plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,max:100,grid:{color:'rgba(146,149,156,0.1)'},ticks:{color:'#92959C'}}},
+        x:{grid:{display:false},ticks:{color:'#92959C',maxRotation:45}}
+      }
+    }
+  });
 
-const topTempo = criativos.filter(c=>c.dias_medios_conversao!==null).sort((a,b)=>a.dias_medios_conversao-b.dias_medios_conversao).slice(0,10);
-new Chart(document.getElementById('chartTempo'),{
-  type:'bar',
-  data:{
-    labels:topTempo.map(c=>c.criativo.length>18?c.criativo.slice(0,18)+'...':c.criativo),
-    datasets:[{
-      label:'Dias ate Conversao',
-      data:topTempo.map(c=>c.dias_medios_conversao),
-      backgroundColor:'rgba(59,130,246,0.6)',
-      borderWidth:1
-    }]
-  },
-  options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,grid:{color:'rgba(148,163,184,0.1)'},ticks:{color:'#94a3b8'}},x:{grid:{display:false},ticks:{color:'#94a3b8',maxRotation:45}}}}
-});
+  const convs = data.filter(c=>c.taxa_conversao>0);
+  if(charts.scatter) charts.scatter.destroy();
+  charts.scatter = new Chart(document.getElementById('chartScatter'),{
+    type:'scatter',
+    data:{
+      datasets:[{
+        label:'Criativos',
+        data:convs.map(c=>({x:c.decil_medio,y:c.taxa_conversao_pct,r:Math.sqrt(c.total_leads)*1.5})),
+        backgroundColor:convs.map(c=>c.decil_medio>=60?'rgba(34,197,94,0.7)':c.decil_medio>=45?'rgba(245,158,11,0.7)':'rgba(254,31,45,0.6)')
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{tooltip:{callbacks:{label:(ctx)=>`${convs[ctx.dataIndex].criativo}: ${ctx.raw.y.toFixed(2)}% conv. | Decil: ${ctx.raw.x.toFixed(1)}`}}}},
+      scales:{
+        x:{title:{display:true,text:'Decil Medio',color:'#92959C'},grid:{color:'rgba(146,149,156,0.1)'},ticks:{color:'#92959C'}}},
+        y:{title:{display:true,text:'Taxa Conversao (%)',color:'#92959C'},grid:{color:'rgba(146,149,156,0.1)'},ticks:{color:'#92959C'}}}
+      }
+    }
+  });
 
-renderTables();
+  const tempData = data.reduce((acc,c)=>{
+    acc.quente += c.pct_quente * c.total_leads / 100;
+    acc.morno += c.pct_morno * c.total_leads / 100;
+    acc.frio += c.pct_frio * c.total_leads / 100;
+    return acc;
+  },{quente:0,morno:0,frio:0});
+  if(charts.temp) charts.temp.destroy();
+  charts.temp = new Chart(document.getElementById('chartTemperatura'),{
+    type:'doughnut',
+    data:{
+      labels:['Quente (60-100)','Morno (45-59)','Frio (0-44)'],
+      datasets:[{
+        data:[tempData.quente,tempData.morno,tempData.frio],
+        backgroundColor:['rgba(34,197,94,0.8)','rgba(245,158,11,0.8)','rgba(254,31,45,0.7)'],
+        borderWidth:0
+      }]
+    },
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{color:'#92959C'}}}}
+  });
+
+  const topTempo = data.filter(c=>c.dias_medios_conversao!==null).sort((a,b)=>a.dias_medios_conversao-b.dias_medios_conversao).slice(0,10);
+  if(charts.tempo) charts.tempo.destroy();
+  charts.tempo = new Chart(document.getElementById('chartTempo'),{
+    type:'bar',
+    data:{
+      labels:topTempo.map(c=>c.criativo.length>18?c.criativo.slice(0,18)+'...':c.criativo),
+      datasets:[{
+        label:'Dias ate Conversao',
+        data:topTempo.map(c=>c.dias_medios_conversao),
+        backgroundColor:'rgba(254,31,45,0.6)',
+        borderWidth:1
+      }]
+    },
+    options:{
+      responsive:true,plugins:{legend:{display:false}},
+      scales:{
+        y:{beginAtZero:true,grid:{color:'rgba(146,149,156,0.1)'},ticks:{color:'#92959C'}}},
+        x:{grid:{display:false},ticks:{color:'#92959C',maxRotation:45}}
+      }
+    }
+  });
+}
+
+renderAllTables(criativos);
+updateCharts(criativos);
 </script>
 
 </body>
