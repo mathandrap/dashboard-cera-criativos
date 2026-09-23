@@ -19,6 +19,8 @@ total_conv = data['total_conv']
 taxa_geral = data['taxa_geral']
 decil_medio_geral = data['decil_medio_geral']
 data_hoje = data['data_hoje']
+data_min = data.get('data_min', '2025-05-01')
+data_max = data.get('data_max', '2026-09-23')
 
 # Gerar options para filtros
 source_options = "\n".join([f'        <option value="{s}">{s}</option>' for s in sources if s != 'desconhecido'])
@@ -124,6 +126,14 @@ with open(template_path, 'w', encoding='utf-8') as f:
     cursor:pointer; transition:border-color 0.2s;
   }
   .filter-group select:hover, .filter-group select:focus {
+    border-color:var(--accent); outline:none;
+  }
+  .filter-group input[type="date"] {
+    background:{{CERA_BLACK}}; border:1px solid var(--border); color:var(--text);
+    padding:0.7rem 1rem; border-radius:8px; font-size:0.9rem;
+    cursor:pointer; transition:border-color 0.2s; font-family:inherit;
+  }
+  .filter-group input[type="date"]:hover, .filter-group input[type="date"]:focus {
     border-color:var(--accent); outline:none;
   }
   .filter-actions {
@@ -292,6 +302,14 @@ with open(template_path, 'w', encoding='utf-8') as f:
 {{CONTENT_OPTIONS}}
       </select>
     </div>
+    <div class="filter-group">
+      <label>Data Inicio</label>
+      <input type="date" id="filterDataInicio" value="{{DATA_MIN}}" min="{{DATA_MIN}}" max="{{DATA_MAX}}" onchange="updateFilters()">
+    </div>
+    <div class="filter-group">
+      <label>Data Fim</label>
+      <input type="date" id="filterDataFim" value="{{DATA_MAX}}" min="{{DATA_MIN}}" max="{{DATA_MAX}}" onchange="updateFilters()">
+    </div>
   </div>
   <div class="filter-actions">
     <button class="btn btn-secondary" onclick="resetFilters()">Limpar Filtros</button>
@@ -389,12 +407,16 @@ function updateFilters() {
   const medium = document.getElementById('filterMedium').value;
   const campaign = document.getElementById('filterCampaign').value;
   const content = document.getElementById('filterContent').value;
+  const dataInicio = document.getElementById('filterDataInicio').value;
+  const dataFim = document.getElementById('filterDataFim').value;
   
   let filtered = criativos;
   if(source !== 'all') filtered = filtered.filter(c => c.fonte === source);
   if(medium !== 'all') filtered = filtered.filter(c => c.midia === medium);
   if(campaign !== 'all') filtered = filtered.filter(c => c.campanha === campaign);
   if(content !== 'all') filtered = filtered.filter(c => c.criativo === content);
+  if(dataInicio) filtered = filtered.filter(c => c.data_max >= dataInicio);
+  if(dataFim) filtered = filtered.filter(c => c.data_min <= dataFim);
   
   renderAllTables(filtered);
   updateCharts(filtered);
@@ -407,6 +429,8 @@ function resetFilters() {
   document.getElementById('filterMedium').value = 'all';
   document.getElementById('filterCampaign').value = 'all';
   document.getElementById('filterContent').value = 'all';
+  document.getElementById('filterDataInicio').value = '{{DATA_MIN}}';
+  document.getElementById('filterDataFim').value = '{{DATA_MAX}}';
   renderAllTables(criativos);
   updateCharts(criativos);
 }
@@ -635,6 +659,8 @@ html_final = template \
     .replace('{{MEDIUM_OPTIONS}}', medium_options) \
     .replace('{{CAMPAIGN_OPTIONS}}', campaign_options) \
     .replace('{{CONTENT_OPTIONS}}', content_options) \
+    .replace('{{DATA_MIN}}', data_min) \
+    .replace('{{DATA_MAX}}', data_max) \
     .replace('{{CRIATIVOS_JSON}}', json.dumps(records, ensure_ascii=False, default=str))
 
 with open(f"{REPO_DIR}\\index.html", 'w', encoding='utf-8') as f:

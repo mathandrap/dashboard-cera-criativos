@@ -169,6 +169,8 @@ agg = df.groupby('criativo').agg(
     campanha=('campanha', lambda x: x.mode()[0] if not x.mode().empty else 'varias'),
     fonte=('fonte', lambda x: x.mode()[0] if not x.mode().empty else 'varias'),
     midia=('midia', lambda x: x.mode()[0] if not x.mode().empty else 'varias'),
+    data_min=('data_lead', 'min'),
+    data_max=('data_lead', 'max'),
 ).reset_index()
 
 agg = agg[agg['total_leads'] >= MIN_LEADS].sort_values('taxa_conversao', ascending=False)
@@ -177,6 +179,8 @@ agg['pct_quente'] = agg['pct_quente'] * 100
 agg['pct_morno'] = agg['pct_morno'] * 100
 agg['pct_frio'] = agg['pct_frio'] * 100
 agg['pct_com_decil'] = agg['pct_com_decil'] * 100
+agg['data_min'] = agg['data_min'].dt.strftime('%Y-%m-%d')
+agg['data_max'] = agg['data_max'].dt.strftime('%Y-%m-%d')
 
 records = agg.to_dict('records')
 total_leads = len(df)
@@ -201,6 +205,11 @@ campaigns_json = json.dumps(campaigns, ensure_ascii=False, default=str)
 contents_json = json.dumps(contents, ensure_ascii=False, default=str)
 data_hoje = datetime.now().strftime('%d/%m/%Y')
 
+# Extrair datas min/max
+df['data_lead'] = pd.to_datetime(df['data_lead'], utc=True)
+data_min = df['data_lead'].min().strftime('%Y-%m-%d')
+data_max = df['data_lead'].max().strftime('%Y-%m-%d')
+
 # Salvar dados para o template
 with open(f"{REPO_DIR}\\data.json", 'w', encoding='utf-8') as f:
     json.dump({
@@ -214,7 +223,9 @@ with open(f"{REPO_DIR}\\data.json", 'w', encoding='utf-8') as f:
         'total_conv': total_conv,
         'taxa_geral': taxa_geral,
         'decil_medio_geral': decil_medio_geral,
-        'data_hoje': data_hoje
+        'data_hoje': data_hoje,
+        'data_min': data_min,
+        'data_max': data_max
     }, f, ensure_ascii=False, default=str)
 
 print("[6/6] HTML gerado e dados salvos!")
