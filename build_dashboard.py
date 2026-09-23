@@ -8,7 +8,21 @@ REPO_DIR = r"C:\Users\PC\Documents\Dashboards\CERA"
 with open(f"{REPO_DIR}\\data.json", 'r', encoding='utf-8') as f:
     data = json.load(f)
 
+# Ler IDs do Meta Ads
+try:
+    with open(f"{REPO_DIR}\\meta_ids.json", 'r', encoding='utf-8') as f:
+        meta_ids = json.load(f)
+except:
+    meta_ids = {'campanhas': {}, 'anuncios': {}}
+
 records = data['criativos']
+
+# Adicionar IDs Meta aos criativos
+for r in records:
+    criativo_id = r['criativo']
+    campanha_id = r['campanha']
+    r['id_meta_criativo'] = meta_ids['anuncios'].get(criativo_id, '')
+    r['id_meta_campanha'] = meta_ids['campanhas'].get(campanha_id, '')
 sources = data['sources']
 mediums = data['mediums']
 campaigns = data['campaigns']
@@ -384,7 +398,7 @@ with open(template_path, 'w', encoding='utf-8') as f:
     <table id="tableFull">
       <thead>
         <tr>
-          <th>Criativo</th><th>Campanha</th><th>Fonte</th><th>Midia</th><th>Leads</th><th>Conv.</th>
+          <th>Criativo</th><th>ID Meta</th><th>Campanha</th><th>Fonte</th><th>Midia</th><th>Leads</th><th>Conv.</th>
           <th>Taxa</th><th>Decil</th><th>Quente</th><th>Morno</th><th>Frio</th><th>Decil%</th><th>Tempo</th>
         </tr>
       </thead>
@@ -471,6 +485,7 @@ function renderAllTables(data) {
   document.getElementById('tbodyFull').innerHTML = data.map(c=>
     `<tr>` +
       `<td class="truncate" title="${c.criativo}">${c.criativo}</td>` +
+      `<td style="font-size:0.75rem;color:var(--text-muted)">${c.id_meta_criativo || '-'}</td>` +
       `<td class="truncate">${c.campanha}</td>` +
       `<td>${c.fonte}</td>` +
       `<td>${c.midia}</td>` +
