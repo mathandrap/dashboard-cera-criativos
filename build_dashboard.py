@@ -676,7 +676,7 @@ html_final = template \
     .replace('{{CONTENT_OPTIONS}}', content_options) \
     .replace('{{DATA_MIN}}', data_min) \
     .replace('{{DATA_MAX}}', data_max) \
-    .replace('{{CRIATIVOS_JSON}}', json.dumps(records, ensure_ascii=False, default=str))
+    .replace('{{CRIATIVOS_JSON}}', json.dumps(records, ensure_ascii=False, default=str, indent=2))
 
 with open(f"{REPO_DIR}\\index.html", 'w', encoding='utf-8') as f:
     f.write(html_final)
