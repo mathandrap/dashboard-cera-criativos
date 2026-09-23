@@ -182,12 +182,14 @@ agg['pct_com_decil'] = agg['pct_com_decil'] * 100
 agg['data_min'] = agg['data_min'].dt.strftime('%Y-%m-%d')
 agg['data_max'] = agg['data_max'].dt.strftime('%Y-%m-%d')
 
-# Limpar NaN antes de serializar
-for col in agg.columns:
-    if agg[col].dtype == 'float64':
-        agg[col] = agg[col].where(agg[col].notna(), None)
-
 records = agg.to_dict('records')
+
+# Limpar NaN para JSON valido
+import math
+for r in records:
+    for k, v in r.items():
+        if isinstance(v, float) and math.isnan(v):
+            r[k] = None
 
 # Adicionar nomes Meta Ads
 meta_ids_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'meta_ids.json')
